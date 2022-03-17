@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
+from torch.utils.data import TensorDataset
 
 
 class DataGeneratorRoom:
@@ -39,7 +41,12 @@ class DataGeneratorRoom:
         self.y_test = self.y[train_split_idx:]
 
         # convert to pytorch format for DataLoader
-        # TODO
+        tensor_train_x = torch.Tensor(self.X_train)
+        tensor_test_x = torch.Tensor(self.X_test)
+        tensor_train_y = torch.Tensor(self.y_train)
+        tensor_test_y = torch.Tensor(self.y_test)
+        self.train = TensorDataset(tensor_train_x, tensor_train_y)
+        self.test = TensorDataset(tensor_test_x, tensor_test_y)
 
     def shuffle(self):
         assert len(self.X) == len(self.y), "Data generation failed, X and y to not have same size"
@@ -90,6 +97,3 @@ class DataGeneratorRoom:
         plt.scatter(self.X_free[:, 0], self.X_free[:, 1])
         plt.show()
 
-
-dg = DataGeneratorRoom(10, 1000, 1000, 0, 0.1, 0.9)
-dg.visualize()
