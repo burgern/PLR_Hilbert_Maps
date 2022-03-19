@@ -7,4 +7,4 @@ from .base_loss import BaseLoss
 
 class HilbertMapLoss(BaseLoss):
     def __init__(self):
-        self.loss_fn = nn.BCELoss()  # Binary Cross-Entropy Loss
+        self.loss_fn = nn.HingeEmbeddingLoss()
