@@ -43,8 +43,8 @@ class DataGeneratorRoom:
     def pytorch_format(self):
         tensor_train_x = torch.Tensor(self.X_train)
         tensor_test_x = torch.Tensor(self.X_test)
-        tensor_train_y = torch.Tensor(self.y_train)
-        tensor_test_y = torch.Tensor(self.y_test)
+        tensor_train_y = torch.Tensor(self.y_train).unsqueeze(-1)
+        tensor_test_y = torch.Tensor(self.y_test).unsqueeze(-1)
         train = TensorDataset(tensor_train_x, tensor_train_y)
         test = TensorDataset(tensor_test_x, tensor_test_y)
         return train, test
@@ -76,7 +76,6 @@ class DataGeneratorRoom:
 
         # wall from <length, 0> to <length, length>
         mask_2 = np.where((x_rand >= 1.0) & (x_rand < 2.0))
-        print(mask_2)
         x[mask_2, 0] = np.random.normal(self.noise_mean + self.length, self.noise_std, size=mask_2[0].size)
         x[mask_2, 1] = self.length * (x_rand[mask_2] - 1)
 
