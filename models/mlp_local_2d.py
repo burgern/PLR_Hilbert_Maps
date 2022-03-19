@@ -24,17 +24,13 @@ class MlpLocal2D(nn.Module):
     """
     def __init__(self):
         super(MlpLocal2D, self).__init__()
-        self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28*28, 512),
-            nn.ReLU(),
-            nn.Linear(512, 512),
-            nn.ReLU(),
-            nn.Linear(512, 10)
+            nn.Linear(2, 32),
+            nn.Linear(32, 32),
+            nn.Linear(32, 1),
+            nn.Sigmoid()
         )
 
     def forward(self, x):
-        x = self.flatten(x)
-        logits = self.linear_relu_stack(x)
-        return logits
-
+        x = self.linear_relu_stack(x)
+        return x
