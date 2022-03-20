@@ -26,11 +26,12 @@ class MlpLocal2D(nn.Module):
         super(MlpLocal2D, self).__init__()
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(2, 32),
+            nn.ReLU(),
             nn.Linear(32, 32),
+            nn.ReLU(),
             nn.Linear(32, 1),
             nn.Sigmoid()
         )
 
     def forward(self, x):
-        x = self.linear_relu_stack(x)
-        return x
+        return self.linear_relu_stack(x)

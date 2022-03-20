@@ -16,17 +16,18 @@ def main():
 
     # Load data
     batch_size = 32
-    data_generator = DataGeneratorRoom(length=10, n_occ=1000, n_free=4000,
-                                       noise_mean=0, noise_std=0.1, train_split=1.0)
+    data_generator = DataGeneratorRoom(length=10, n_occ=1000, n_free=1000,
+                                       noise_mean=0, noise_std=0.1, train_split=0.9)
     train_dataloader = DataLoader(data_generator.train, batch_size=batch_size)
     test_dataloader = DataLoader(data_generator.test, batch_size=batch_size)
 
     # Load model
     model = MlpLocal2D().to(device)
+    print(model)
 
     # Loss and optimizer
-    loss_fn = HilbertMapLoss().loss_fn
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    loss_fn = torch.nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-1)
 
     # train
     epochs = 30
@@ -35,6 +36,10 @@ def main():
         train(train_dataloader, model, device, loss_fn, optimizer)
         test(test_dataloader, model, device, loss_fn)
     print("Done!")
+
+    # debugger
+    # print(model.parameters())
+    # print(list(model.parameters())[0].grad)
 
     # save model
     model_path = "model_mlp"
