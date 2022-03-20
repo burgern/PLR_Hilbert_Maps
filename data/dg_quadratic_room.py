@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
+from torch.utils.data import TensorDataset
 
 
 class DataGeneratorRoom:
@@ -33,13 +35,26 @@ class DataGeneratorRoom:
 
         # split train and evaluation dataset
         train_split_idx = int(self.train_split * self.X.shape[0])
-        self.X_train = self.X[:train_split_idx, :]
-        self.X_test = self.X[train_split_idx:, :]
-        self.y_train = self.y[:train_split_idx]
-        self.y_test = self.y[train_split_idx:]
+        self.X_train, self.X_test, self.y_train, self.y_test = self.split(train_split_idx)
 
         # convert to pytorch format for DataLoader
-        # TODO
+        self.train, self.test = self.pytorch_format()
+
+    def pytorch_format(self):
+        tensor_train_x = torch.Tensor(self.X_train)
+        tensor_test_x = torch.Tensor(self.X_test)
+        tensor_train_y = torch.Tensor(self.y_train).unsqueeze(-1)
+        tensor_test_y = torch.Tensor(self.y_test).unsqueeze(-1)
+        train = TensorDataset(tensor_train_x, tensor_train_y)
+        test = TensorDataset(tensor_test_x, tensor_test_y)
+        return train, test
+
+    def split(self, train_split_idx):
+        X_train = self.X[:train_split_idx, :]
+        X_test = self.X[train_split_idx:, :]
+        y_train = self.y[:train_split_idx]
+        y_test = self.y[train_split_idx:]
+        return X_train, X_test, y_train, y_test
 
     def shuffle(self):
         assert len(self.X) == len(self.y), "Data generation failed, X and y to not have same size"
@@ -55,23 +70,23 @@ class DataGeneratorRoom:
 
         # find random point on wall and add gaussian noise
         # wall from <0, 0> to <length, 0>
-        mask_1 = x_rand < 1.0
+        mask_1 = np.where(x_rand < 1.0)
         x[mask_1, 0] = self.length * x_rand[mask_1]
-        x[mask_1, 1] = np.random.normal(self.noise_mean, self.noise_std)
+        x[mask_1, 1] = np.random.normal(self.noise_mean, self.noise_std, size=mask_1[0].size)
 
         # wall from <length, 0> to <length, length>
         mask_2 = np.where((x_rand >= 1.0) & (x_rand < 2.0))
-        x[mask_2, 0] = np.random.normal(self.noise_mean + self.length, self.noise_std)
+        x[mask_2, 0] = np.random.normal(self.noise_mean + self.length, self.noise_std, size=mask_2[0].size)
         x[mask_2, 1] = self.length * (x_rand[mask_2] - 1)
 
         # wall from <length, length> to <0, length>
         mask_3 = np.where((x_rand >= 2.0) & (x_rand < 3.0))
         x[mask_3, 0] = self.length * (x_rand[mask_3] - 2)
-        x[mask_3, 1] = np.random.normal(self.noise_mean + self.length, self.noise_std)
+        x[mask_3, 1] = np.random.normal(self.noise_mean + self.length, self.noise_std, size=mask_3[0].size)
 
         # wall from <0, length> to <0, 0'>
-        mask_4 = x_rand >= 3.0
-        x[mask_4, 0] = np.random.normal(self.noise_mean, self.noise_std)
+        mask_4 = np.where(x_rand >= 3.0)
+        x[mask_4, 0] = np.random.normal(self.noise_mean, self.noise_std, size=mask_4[0].size)
         x[mask_4, 1] = self.length * (x_rand[mask_4] - 3)
 
         assert not np.isnan(x).any(), "there is a nan value somewhere in the datageneration"
@@ -86,10 +101,6 @@ class DataGeneratorRoom:
         return x, y
 
     def visualize(self):
-        plt.scatter(self.X_occ[:, 0], self.X_occ[:, 1])
-        plt.scatter(self.X_free[:, 0], self.X_free[:, 1])
+        plt.scatter(self.X_free[:, 0], self.X_free[:, 1], s=2)
+        plt.scatter(self.X_occ[:, 0], self.X_occ[:, 1], s=2)
         plt.show()
-
-
-dg = DataGeneratorRoom(10, 1000, 1000, 0, 0.1, 0.9)
-dg.visualize()
