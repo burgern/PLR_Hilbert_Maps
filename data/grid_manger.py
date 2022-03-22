@@ -1,8 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+import os
+import pickle
 from torch.utils.data import TensorDataset, DataLoader
 from PLR_Hilbert_Maps.training import train
+from PLR_Hilbert_Maps.config import PATH_LOG, GRID_MANAGER_NAME
 
 
 class GridManager:
@@ -35,8 +38,20 @@ class GridManager:
         self.cell_mask = self.compute_cell_masks()  # iterate over grid whilst creating a cell mask
         self.occupancy_mask = self.compute_occupancy_map()  # iterate over grid to check for non-occupied grids
 
-        # empty model array
+        # log of experiment
+        self.exp_path = self.check_exp_path()  # check for overrides and dir creation
         self.grid_models = np.empty(self.gm_shape, dtype=object)
+
+    def check_exp_path(self):
+        exp_path = os.path.join(PATH_LOG, self.exp_name)
+        if os.path.exists(exp_path):
+            usr_input = input(f"experiment: {self.exp_name} already exists, do you want to overwrite? [Yes/no]")
+            if usr_input not in {"Yes", "yes", "y", ""}:
+                quit()
+        else:
+            os.makedirs(exp_path)
+            print(f"directory for log of models created: {exp_path}")
+        return exp_path
 
     def gm_size(self):
         x_min = self.pos[:, 0].min()
@@ -91,18 +106,9 @@ class GridManager:
         print("Done!")
 
         # save model
-        model_path = f"{self.exp_name}_x_{cell_x}_y_{cell_y}"
-        torch.save(model.state_dict(), model_path)
+        model_cell_path = os.path.join(self.exp_path, f"x_{cell_x}_y_{cell_y}")
+        torch.save(model.state_dict(), model_cell_path)
         self.grid_models[cell_x, cell_y] = model
-
-
-    def visualize_cell(self, x, y):
-        pos = self.pos[self.cell_mask[x, y, :]]
-        occ = self.occ[self.cell_mask[x, y, :]]
-
-        plt.scatter(pos[:, 0], pos[:, 1], s=2, c=occ, cmap='viridis')
-        plt.colorbar()
-        plt.show()
 
     def pred(self, x_pos, y_pos):
         # find the correct cell
@@ -111,16 +117,29 @@ class GridManager:
 
         # load local cell model
         model = self.grid_models[cell_x, cell_y]
-        model.load_state_dict(torch.load(f"../scripts/{self.exp_name}_x_{cell_x}_y_{cell_y}"))
+        #model_path = os.path.join(self.exp_path, f"x_{cell_x}_y_{cell_y}")
+        #model.load_state_dict(torch.load(model_path))
 
         # build data
         pos_tensor = torch.Tensor(np.array([x_pos, y_pos]))
-        data = TensorDataset(pos_tensor)
 
         # make prediction
         model.eval()
         with torch.no_grad():
-            pred = model(data)
+            pred = model(pos_tensor)
         pred_np = pred.cpu().detach().numpy()
 
         return pred_np
+
+    def gm_save(self):
+        gm_path = os.path.join(self.exp_path, GRID_MANAGER_NAME)
+        with open(gm_path, 'wb') as file:
+            pickle.dump(self, file)
+
+    @staticmethod
+    def gm_load(exp_name: str):
+        gm_path = os.path.join(PATH_LOG, "global_v001/grid_manager.p")
+        with open(gm_path, 'rb') as file:
+            gm = pickle.load(file)
+        return gm
+
