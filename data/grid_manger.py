@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import torch
 import os
 import pickle
@@ -106,8 +105,8 @@ class GridManager:
         print("Done!")
 
         # save model
-        model_cell_path = os.path.join(self.exp_path, f"x_{cell_x}_y_{cell_y}")
-        torch.save(model.state_dict(), model_cell_path)
+        # model_cell_path = os.path.join(self.exp_path, f"x_{cell_x}_y_{cell_y}")
+        # torch.save(model.state_dict(), model_cell_path)
         self.grid_models[cell_x, cell_y] = model
 
     def pred(self, x_pos, y_pos):
@@ -138,7 +137,7 @@ class GridManager:
 
     @staticmethod
     def gm_load(exp_name: str):
-        gm_path = os.path.join(PATH_LOG, "global_v001/grid_manager.p")
+        gm_path = os.path.join(PATH_LOG, exp_name, "grid_manager.p")
         with open(gm_path, 'rb') as file:
             gm = pickle.load(file)
         return gm

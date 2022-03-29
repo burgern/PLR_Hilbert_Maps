@@ -3,25 +3,27 @@ import torch
 from PLR_Hilbert_Maps.utils import device_setup
 from PLR_Hilbert_Maps.models import MlpLocal2D, FCN
 from PLR_Hilbert_Maps.data import DataGeneratorRoom, GridManager
-import pickle
 
 torch.autograd.set_detect_anomaly(True)
 
 
 def main():
+    # experiment name
+    exp_name = "global_occ_1000_free_5000"
+
     # set up device
     device = device_setup()
 
     # load/generate data
-    data_generator = DataGeneratorRoom(length=10, n_occ=1000, n_free=1000,
+    data_generator = DataGeneratorRoom(length=10, n_occ=1000, n_free=5000,
                                        noise_mean=0, noise_std=0.1, train_split=1.0)
     X = data_generator.X_train
     y = np.expand_dims(data_generator.y_train, axis=1)
 
     # grid management
-    exp_name = "global_occ_1000_free_1000"  # experiment name
     cell_width, cell_height = 2, 2
     gm = GridManager(X, y, cell_width, cell_height, exp_name)
+    data_generator.save_visualization(gm.exp_path)
 
     # train all models in grid
     for cell_x in range(0, gm.gm_shape[0]):

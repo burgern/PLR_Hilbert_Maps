@@ -3,7 +3,7 @@ from PLR_Hilbert_Maps.visualizer import VisualizePredictions
 
 
 def main():
-    exp_name = "global_occ_1000_free_1000"
+    exp_name = "global_occ_1000_free_5000"
 
     # load GridManager log
     gm = GridManager.gm_load(exp_name)

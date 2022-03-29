@@ -33,7 +33,7 @@ class VisualizePredictions:
             for y in self.y_arr:
                 self.x_np[i] = x
                 self.y_np[i] = y
-                self.pred_np[i] = self.gm.pred(x, y)
+                pred_np[i] = self.gm.pred(x, y)
                 i += 1
         return pred_np
 

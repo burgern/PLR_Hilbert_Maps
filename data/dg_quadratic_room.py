@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import TensorDataset
+import os
 
 
 class DataGeneratorRoom:
@@ -104,3 +105,9 @@ class DataGeneratorRoom:
         plt.scatter(self.X_free[:, 0], self.X_free[:, 1], s=2)
         plt.scatter(self.X_occ[:, 0], self.X_occ[:, 1], s=2)
         plt.show()
+
+    def save_visualization(self, exp_path):
+        plt.scatter(self.X_free[:, 0], self.X_free[:, 1], s=2)
+        plt.scatter(self.X_occ[:, 0], self.X_occ[:, 1], s=2)
+        plt.show()
+        plt.savefig(os.path.join(exp_path, "data.png"))
