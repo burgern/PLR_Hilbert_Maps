@@ -3,9 +3,10 @@ import json
 
 class BaseDataSet(Dataset):
     def __init__(self, config):
-        self.sensor_config = json.load(config["sensor_type_path"])
-        self.data_config = json.load(config["data_config_path"])
-        self.learning_method_config = json.load(config["learning_method_config_path"])
+        with open(config["sensor_config_path"]) as f:
+            self.sensor_config = json.load(f)
+        with open(config["data_config_path"]) as f:
+            self.data_config = json.load(f)
 
     def __len__(self):
         raise NotImplementedError
