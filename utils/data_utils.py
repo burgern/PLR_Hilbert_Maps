@@ -12,6 +12,6 @@ def get_depth_samples_and_pose_data_from_replica_data_folder(files_of_replica_da
     for file in files_of_replica_data_folder:
         if "txt" in file:
             pose_data_file = file
-        else:
+        elif "pkl" in file:
             depth_samples.append(file)
     return depth_samples, pose_data_file
