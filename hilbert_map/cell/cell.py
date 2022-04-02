@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 import numpy as np
+from PLR_Hilbert_Maps.utils import concatenate_ones
 
 
 class Cell(ABC):
@@ -48,7 +49,7 @@ class Cell(ABC):
         return normalization_mat
 
     def original_to_normalized(self, points_original: np.array):
-        return self.normalization_mat.dot(points_original)
+        return self.normalization_mat.dot(concatenate_ones(points_original, 0))[:2, :]
 
     def normalized_to_original(self, points_normalized: np.array):
-        return self.normalization_mat_inv.dot(points_normalized)
+        return self.normalization_mat_inv.dot(concatenate_ones(points_normalized, 0))[:2, :]

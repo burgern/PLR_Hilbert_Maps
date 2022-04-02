@@ -15,8 +15,7 @@ class Hexagon(Cell):
         super().__init__(center, r1, r2, nx, ny)
 
     def is_point_in_cell(self, points: np.array) -> bool:
-        points_ = concatenate_ones(points, 0)
-        points_norm_abs = np.absolute(self.original_to_normalized(points_))
+        points_norm_abs = np.absolute(self.original_to_normalized(points))
 
         # hexagon equation: x + y * nx / (2 * ny) <= nx
         hexagon_eq = points_norm_abs[0, :] + points_norm_abs[1, :] * self.nx / (2 * self.ny)

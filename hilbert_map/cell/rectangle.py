@@ -15,7 +15,6 @@ class Rectangle(Cell):
         super().__init__(center, r1, r2, nx, ny)
 
     def is_point_in_cell(self, points: np.array) -> bool:
-        points_ = concatenate_ones(points, 0)
-        points_norm_abs = np.absolute(self.original_to_normalized(points_))
+        points_norm_abs = np.absolute(self.original_to_normalized(points))
         mask = ((points_norm_abs[0, :]) <= self.nx) & (points_norm_abs[1, :] <= self.ny)
         return mask
