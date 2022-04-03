@@ -62,7 +62,3 @@ class Leaf(Component):
 
     def plot(self):
         raise NotImplementedError
-
-    @abstractmethod
-    def train(self):
-        raise NotImplementedError
