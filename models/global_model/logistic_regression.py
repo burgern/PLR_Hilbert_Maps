@@ -1,4 +1,4 @@
-from global_model import GlobalModel
+from .global_model import GlobalModel
 
 
 class LogisticRegression(GlobalModel):

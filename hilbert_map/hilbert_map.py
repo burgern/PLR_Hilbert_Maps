@@ -1,4 +1,4 @@
-from composite_design import Composite
+from .composite_design import Composite
 
 
 class HilbertMap(Composite):
