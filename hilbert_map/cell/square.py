@@ -1,7 +1,7 @@
 from . import Cell
 from typing import Tuple
 import numpy as np
-from PLR_Hilbert_Maps.utils import concatenate_ones
+import matplotlib.patches as patches
 
 
 class Square(Cell):
@@ -18,3 +18,9 @@ class Square(Cell):
         points_norm_abs = np.absolute(self.original_to_normalized(points))
         mask = ((points_norm_abs[0, :]) <= self.nx) & (points_norm_abs[1, :] <= self.ny)
         return mask
+
+    def patch(self) -> patches:
+        bottom_left = self.center - self.r1 - self.r2
+        patch = patches.Rectangle((bottom_left[0], bottom_left[1]), 2 * self.r1_mag, 2 * self.r2_mag,
+                                  edgecolor=self.patch_edgecolor, linewidth=self.patch_linewidth, facecolor='none')
+        return patch

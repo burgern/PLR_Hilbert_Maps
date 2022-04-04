@@ -1,7 +1,7 @@
 from . import Cell
 from typing import Tuple
 import numpy as np
-from PLR_Hilbert_Maps.utils import concatenate_ones
+import matplotlib.patches as patches
 
 
 class Hexagon(Cell):
@@ -14,6 +14,14 @@ class Hexagon(Cell):
         r2 = (0, length / 2)
         super().__init__(center, r1, r2, nx, ny)
 
+        self.edges = np.concatenate((self.r1,
+                                     self.r1 / 2 + self.r2,
+                                     - self.r1 / 2 + self.r2,
+                                     - self.r1,
+                                     - self.r1 / 2 - self.r2,
+                                     self.r1 / 2, - self.r2,
+                                     self.r1), axis=1) + self.center
+
     def is_point_in_cell(self, points: np.array) -> bool:
         points_norm_abs = np.absolute(self.original_to_normalized(points))
 
@@ -21,3 +29,8 @@ class Hexagon(Cell):
         hexagon_eq = points_norm_abs[0, :] + points_norm_abs[1, :] * self.nx / (2 * self.ny)
         mask = (points_norm_abs[0, :] <= self.nx) & (points_norm_abs[1, :] <= self.ny) & (hexagon_eq <= self.nx)
         return mask
+
+    def patch(self) -> patches:
+        patch = patches.Rectangle(self.edges.T, closed=True, edgecolor=self.patch_edgecolor,
+                                  linewidth=self.patch_linewidth, facecolor='none')
+        return patch

@@ -2,6 +2,10 @@ from abc import ABC, abstractmethod
 from typing import Tuple
 import numpy as np
 from PLR_Hilbert_Maps.utils import concatenate_ones
+from PLR_Hilbert_Maps.config import PATH_CONFIG_CELL
+import matplotlib.patches as patches
+from typing import Optional
+from configparser import ConfigParser
 
 
 class Cell(ABC):
@@ -10,7 +14,12 @@ class Cell(ABC):
     TODO Description
     """
     def __init__(self, center: Tuple[float, float], r1: Tuple[float, float], r2: Tuple[float, float],
-                 nx: float, ny: float):
+                 nx: float, ny: float, patch_edgecolor: Optional[str] = None, patch_linewidth: Optional[float] = None):
+        # read config.ini file for default values
+        config = ConfigParser()
+        config.read(PATH_CONFIG_CELL)
+
+        # read inputs
         self.center = np.array([center[0], center[1]])
         self.r1 = np.array([r1[0], r1[1]])
         self.r2 = np.array([r2[0], r2[1]])
@@ -25,8 +34,18 @@ class Cell(ABC):
         self.normalization_mat = self.compute_normalization_mat()
         self.normalization_mat_inv = np.linalg.inv(self.normalization_mat)
 
+        # get configurations
+        self.patch_edgecolor = patch_edgecolor if patch_edgecolor is not None \
+            else config.get('Patch', 'patch_edgecolor')
+        self.patch_linewidth = patch_linewidth if patch_linewidth is not None \
+            else config.getint('Patch', 'patch_linewidth')
+
     @abstractmethod
     def is_point_in_cell(self, points: np.array) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def patch(self) -> patches:
         raise NotImplementedError
 
     def compute_normalization_mat(self):

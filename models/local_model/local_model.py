@@ -30,13 +30,15 @@ class LocalModel:
 
         self.device = device_setup()  # device setup (cpu or gpu)
 
-    def predict(self):
-        raise NotImplementedError
+    def predict(self, points: np.array):
+        x = torch.Tensor(points.T)
+        self.model.eval()
+        with torch.no_grad():
+            pred = self.model(x)
+        pred_np = pred.cpu().detach().numpy()
+        return pred_np
 
     def evaluate(self):
-        raise NotImplementedError
-
-    def plot(self):
         raise NotImplementedError
 
     def train(self, points: np.array, occupancy: np.array):
@@ -59,11 +61,12 @@ class LocalModel:
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+        self.model = model
 
     def get_dataloader(self, points: np.array, occupancy: np.array):
         occupancy = occupancy.reshape((len(occupancy), 1))
         points_tensor = torch.Tensor(points.T)
         occupancy_tensor = torch.Tensor(occupancy)
         dataset = TensorDataset(points_tensor, occupancy_tensor)
-        dataloader = DataLoader(dataset, batch_size=self.batch_size)
+        dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=True)
         return dataloader
