@@ -2,6 +2,7 @@ from . import Cell
 from typing import Tuple
 import numpy as np
 import matplotlib.patches as patches
+from typing import Optional
 
 
 class Ellipsoid(Cell):
@@ -10,7 +11,7 @@ class Ellipsoid(Cell):
     TODO Description
     TODO ellispoid input should be radius of horizontal axis, radius of vertical axis and angle and not r1, r2
     """
-    def __init__(self, center: Tuple[float, float], r1: Tuple[float, float], r2: Tuple[float, float], nx: float,
+    def __init__(self, center: Optional[Tuple[float, float]], r1: Tuple[float, float], r2: Tuple[float, float], nx: float,
                  ny: float):
         super().__init__(center, r1, r2, nx, ny)
 

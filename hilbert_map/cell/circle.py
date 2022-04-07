@@ -2,6 +2,7 @@ from .cell import Cell
 from typing import Tuple
 import numpy as np
 import matplotlib.patches as patches
+from typing import Optional
 
 
 class Circle(Cell):
@@ -9,7 +10,7 @@ class Circle(Cell):
     Circle
     TODO Description
     """
-    def __init__(self, center: Tuple[float, float], radius: float, nx: float, ny: float):
+    def __init__(self, center: Optional[Tuple[float, float]], radius: float, nx: float, ny: float):
         r1 = (radius, 0)
         r2 = (0, radius)
         super().__init__(center, r1, r2, nx, ny)

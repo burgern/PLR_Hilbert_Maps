@@ -8,6 +8,7 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 from torch import nn
 from torch import optim
+import copy
 
 
 class LocalModel:
@@ -70,3 +71,7 @@ class LocalModel:
         dataset = TensorDataset(points_tensor, occupancy_tensor)
         dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=True)
         return dataloader
+
+    def new_model(self):
+        new_model = copy.deepcopy(self)
+        return new_model

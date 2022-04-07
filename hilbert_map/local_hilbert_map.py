@@ -27,6 +27,15 @@ class LocalHilbertMap(Leaf):
         points = self.preprocessing(points)
         return self.local_model.predict(points)
 
+    def predict_2(self, points: np.array):
+        out = np.empty(points.shape[1])
+        mask = self.cell.is_point_in_cell(points)
+        out[~mask] = np.nan
+        if np.any(mask):
+            x = np.squeeze(self.local_model.predict(points[:, mask]))
+            out[mask] = x
+        return out
+
     def evaluate(self):
         raise NotImplementedError
 
