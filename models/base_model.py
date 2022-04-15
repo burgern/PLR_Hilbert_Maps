@@ -11,13 +11,14 @@ from torch import optim
 import copy
 
 
-class LocalModel:
+class BaseModel(nn.Module):
     """
     Local Model
     TODO Description
     """
     def __init__(self, model: nn.Module = MLP(), loss_fn: nn.modules.loss = nn.BCELoss(), lr: float = 1e-3,
                  batch_size: int = None, epochs: int = None):
+        super().__init__()
         # read config.ini file for default values
         config = ConfigParser()
         config.read(PATH_CONFIG_LOCAL_MODEL)
