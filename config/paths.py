@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-LOCAL_PLR = "/home/nico/code/ETHZ/PLR/PLR_Hilbert_Maps"
+LOCAL_PLR = "/home/amirhadzic/PLR_Hilbert_Maps"
 PATH_PLR = os.path.join(Path.home(), LOCAL_PLR)
 PATH_LOG = os.path.join(PATH_PLR, "log")
 

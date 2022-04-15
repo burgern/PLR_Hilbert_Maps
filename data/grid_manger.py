@@ -3,8 +3,8 @@ import torch
 import os
 import pickle
 from torch.utils.data import TensorDataset, DataLoader
-from PLR_Hilbert_Maps.training import train
-from PLR_Hilbert_Maps.config import PATH_LOG, GRID_MANAGER_NAME
+from training import train
+from config import PATH_LOG, GRID_MANAGER_NAME
 
 
 class GridManager:
