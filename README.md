@@ -1,7 +1,14 @@
-Todo up to tomorrow 18:00
-
-- P2: Logistic Regression: Amir
-- P1: GridManager: Nico
-- P2: Grid Visualization: Nico
-- MLPlocal config: Nico
-- Loss: Amir
+# Todo's
+### Amir
+- P2: Logistic Regression
+- Loss
+### Nico
+- Ellipse (alpha, primary, secondary)
+- Cell overlap
+- global config.ini
+- log
+- metric
+  - roc
+  - pr
+- GUI (pyQT5)
+- 
