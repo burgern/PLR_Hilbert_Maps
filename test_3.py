@@ -19,8 +19,8 @@ class Data:
     def __init__(self, n, center, size):
         self.points = np.random.uniform(-size/2, size/2, (2, n))
         self.reflectance = np.random.rand(n)
-        elipse_out = Ellipsoid(center=center, r1=(2, 2), r2=(-5, 5), nx=0.5, ny=0.5)
-        elipse_in = Ellipsoid(center=center, r1=(1.8, 1.8), r2=(-4.8, 4.8), nx=0.5, ny=0.5)
+        elipse_out = Ellipsoid(center=center, angle=45, radius_primary=5, radius_secondary=3, nx=0.5, ny=0.5)
+        elipse_in = Ellipsoid(center=center, angle=45, radius_primary=4.8, radius_secondary=2.8, nx=0.5, ny=0.5)
         elipse_out_mask = elipse_out.is_point_in_cell(self.points)
         elipse_in_mask = elipse_in.is_point_in_cell(self.points)
         walls_in = Square(center=(0, 0), width=19.6, nx=0.5, ny=0.5)
@@ -38,25 +38,25 @@ def main():
     data = Data(n=100000, center=(2, 2), size=20)
     visualize(data.points, c=data.occupancy, xlim=(-10, 10), ylim=(-10, 10))
 
-    # initialize cell
-    cell = Rectangle(center=None, width=1, length=4, nx=0.5, ny=0.5)
-
-    # initialize local model
-    local_model = LocalModel(MLP(), nn.BCELoss(), lr=0.005, batch_size=32, epochs=10)
-
-    # initialize local hilbert map collection
-    lhmc = LocalHilbertMapCollection(cell, local_model)
-
-    # update local hilbert map collection
-    lhmc.update(data.points, data.occupancy)
-
-    # plot
-    lhmc.plot(1001)
-
-    # log results
-
-    # save lhm
-    pickle.dump(lhmc, open('lhmc.pkl', 'wb'))
+    # # initialize cell
+    # cell = Rectangle(center=None, width=1, length=4, nx=0.5, ny=0.5)
+    #
+    # # initialize local model
+    # local_model = LocalModel(MLP(), nn.BCELoss(), lr=0.005, batch_size=32, epochs=10)
+    #
+    # # initialize local hilbert map collection
+    # lhmc = LocalHilbertMapCollection(cell, local_model)
+    #
+    # # update local hilbert map collection
+    # lhmc.update(data.points, data.occupancy)
+    #
+    # # plot
+    # lhmc.plot(1001)
+    #
+    # # log results
+    #
+    # # save lhm
+    # pickle.dump(lhmc, open('lhmc.pkl', 'wb'))
 
 
 if __name__ == "__main__":

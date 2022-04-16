@@ -3,16 +3,25 @@ from typing import Tuple
 import numpy as np
 import matplotlib.patches as patches
 from typing import Optional
+import math
 
 
 class Ellipsoid(Cell):
     """
     Ellipsoid
     TODO Description
-    TODO ellispoid input should be radius of horizontal axis, radius of vertical axis and angle and not r1, r2
+    Input:
+        center:             x, y coordinates
+        angle:              horizontal to primary axis in degrees
+        radius_primary:     primary radius
+        radius_secondary:   secondary radius
+        nx:                 normalized box radius (horizontal)
+        ny:                 normalized box radius (vertical)
     """
-    def __init__(self, center: Optional[Tuple[float, float]], r1: Tuple[float, float], r2: Tuple[float, float], nx: float,
-                 ny: float):
+    def __init__(self, center: Optional[Tuple[float, float]], angle: float, radius_primary: float,
+                 radius_secondary: float, nx: float, ny: float):
+        r1 = (radius_primary * math.cos(angle), radius_primary * math.sin(angle))
+        r2 = (radius_secondary * math.cos(angle + math.pi / 2), radius_secondary * math.sin(angle + math.pi / 2))
         super().__init__(center, r1, r2, nx, ny)
 
     def is_point_in_cell(self, points: np.array) -> bool:
