@@ -1,17 +1,18 @@
 import os
 from pathlib import Path
+from .local_config import LOCAL_PLR, LOCAL_DATA
 
-LOCAL_PLR = "/home/nico/code/ETHZ/PLR/PLR_Hilbert_Maps"
+# project path
 PATH_PLR = os.path.join(Path.home(), LOCAL_PLR)
-PATH_LOG = os.path.join(PATH_PLR, "log")
-PATH_CONFIG = os.path.join(PATH_PLR, 'config')
-PATH_CONFIG_LOCAL_MODEL = os.path.join(PATH_CONFIG, 'local_model.ini')
-PATH_CONFIG_LOCAL_HILBERT_MAP = os.path.join(PATH_CONFIG, 'local_hilbert_map.ini')
-PATH_CONFIG_CELL = os.path.join(PATH_CONFIG, 'cell.ini')
 
-# check whether PATH_MODELS already exists
+# log path
+PATH_LOG = os.path.join(PATH_PLR, "log")
 if not os.path.exists(PATH_LOG):
     os.makedirs(PATH_LOG)
     print("Required models/log folder created for future model logs")
 
-GRID_MANAGER_NAME = "grid_manager.p"
+# config paths
+PATH_CONFIG = os.path.join(PATH_PLR, 'config')
+PATH_CONFIG_LOCAL_MODEL = os.path.join(PATH_CONFIG, 'local_model.ini')
+PATH_CONFIG_LOCAL_HILBERT_MAP = os.path.join(PATH_CONFIG, 'local_hilbert_map.ini')
+PATH_CONFIG_CELL = os.path.join(PATH_CONFIG, 'cell.ini')
