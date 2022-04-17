@@ -1,3 +1,7 @@
+# Setup
+1. Set up local paths in config/local_config.py
+
+
 # Todo's
 ### Amir
 - P2: Logistic Regression
@@ -5,7 +9,9 @@
 ### Nico
 - ~~Ellipse (alpha, primary, secondary)~~
 - ~~Dataset with simple features~~
-- bugfix
+- ~~bugfix~~
+- lhm tracking of individuals
+- automatic running and testing
 - Cell overlap
 - global config.ini
 - log
@@ -13,4 +19,4 @@
   - roc
   - pr
 - GUI (pyQT5)
-- 
+- default nx, ny

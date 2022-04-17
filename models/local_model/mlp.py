@@ -10,6 +10,8 @@ class MLP(nn.Module):
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(2, 16, bias=True),
             nn.Tanhshrink(),
+            nn.Linear(16, 16, bias=True),
+            nn.Tanhshrink(),
             nn.Linear(16, 1, bias=True),
             nn.Sigmoid()
         )

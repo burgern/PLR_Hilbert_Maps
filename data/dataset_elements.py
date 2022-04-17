@@ -8,7 +8,7 @@ class DatasetHexagon:
     DatasetHexagon
     size [m] x size [m] area with elements
     """
-    def __init__(self, n, size, center, occlusion_zone=0.2, nx=0.5, ny=0.5):
+    def __init__(self, n, size, center, occlusion_zone=0.3, nx=0.5, ny=0.5):
         # input parameters
         self.n = n
         self.size = size
@@ -18,7 +18,7 @@ class DatasetHexagon:
         self.ny = ny
 
         # initialize points
-        self.points = np.random.uniform(-self.size/2, self.size/2, (2, self.n))
+        self.points = np.random.uniform(-self.size/2 + center[0], self.size/2 + center[1], (2, self.n))
         self.reflectance = np.random.rand(self.n)  # set non-occupied to np.nan
 
         # create wall
@@ -83,5 +83,5 @@ class DatasetHexagon:
         plt.scatter(self.points[0, :], self.points[1, :], c=self.occupancy, s=1)
         plt.xlim(self.center[0] - self.size / 2, self.center[0] + self.size / 2)
         plt.ylim(self.center[1] - self.size / 2, self.center[1] + self.size / 2)
-        plt.gca().set_aspect('equal', adjustable='box')
+        plt.axis('scaled')
         plt.show()

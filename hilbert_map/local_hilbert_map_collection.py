@@ -52,20 +52,23 @@ class LocalHilbertMapCollection(Composite):
 
         # get predictions
         zz = np.empty((points.shape[1],))
+        zz[:] = np.nan
         for lhm in self.lhm_collection:
             mask = lhm.cell.is_point_in_cell(points)
             points_in_cell = points[:, mask]
             zz_in_cell = np.squeeze(lhm.predict(points_in_cell))
             zz[mask] = zz_in_cell
         zz = zz.reshape(len(y), len(x))
-        np.nan_to_num(zz, nan=-1.0)  # nan values are points where no predictions
+        #zz = np.nan_to_num(zz, nan=-1.0)  # nan values are points where no predictions
 
         # plot
         fig, ax = plt.subplots(figsize=(10, 5))
+        ax.set_facecolor('lightcoral')
         mapping = ax.contourf(x, y, zz, levels=10, cmap='binary')
         fig.colorbar(mapping)
         for lhm in self.lhm_collection:
             ax.add_patch(lhm.cell.patch())  # add patches
+        plt.axis('scaled')
         plt.show()
 
     def is_point_in_collection(self, points: np.array):

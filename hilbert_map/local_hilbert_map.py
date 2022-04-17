@@ -5,7 +5,6 @@ from typing import Optional
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 
 
 class LocalHilbertMap(Leaf):
@@ -58,6 +57,7 @@ class LocalHilbertMap(Leaf):
         axs[1].contourf(np.linspace(-self.cell.nx, self.cell.nx, resolution),
                         np.linspace(-self.cell.ny, self.cell.ny, resolution),
                         zz, levels=10, cmap='binary')
+        plt.axis('scaled')
         plt.show()
 
     def preprocessing(self, points: np.array, occupancy: Optional[np.array] = None):

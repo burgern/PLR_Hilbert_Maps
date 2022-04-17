@@ -16,3 +16,5 @@ PATH_CONFIG = os.path.join(PATH_PLR, 'config')
 PATH_CONFIG_LOCAL_MODEL = os.path.join(PATH_CONFIG, 'local_model.ini')
 PATH_CONFIG_LOCAL_HILBERT_MAP = os.path.join(PATH_CONFIG, 'local_hilbert_map.ini')
 PATH_CONFIG_CELL = os.path.join(PATH_CONFIG, 'cell.ini')
+
+GRID_MANAGER_NAME = "grid_manager.p"
