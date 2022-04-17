@@ -20,8 +20,9 @@ class Ellipsoid(Cell):
     """
     def __init__(self, center: Optional[Tuple[float, float]], angle: float, radius_primary: float,
                  radius_secondary: float, nx: float, ny: float):
-        r1 = (radius_primary * math.cos(angle), radius_primary * math.sin(angle))
-        r2 = (radius_secondary * math.cos(angle + math.pi / 2), radius_secondary * math.sin(angle + math.pi / 2))
+        angle_rad = math.radians(angle)
+        r1 = (radius_primary * math.cos(angle_rad), radius_primary * math.sin(angle_rad))
+        r2 = (radius_secondary * math.cos(angle_rad + math.pi / 2), radius_secondary * math.sin(angle_rad + math.pi / 2))
         super().__init__(center, r1, r2, nx, ny)
 
     def is_point_in_cell(self, points: np.array) -> bool:
