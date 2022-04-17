@@ -15,13 +15,14 @@ class Hexagon(Cell):
         r2 = (0, length / 2)
         super().__init__(center, r1, r2, nx, ny)
 
-        self.edges = np.concatenate((self.r1,
-                                     self.r1 / 2 + self.r2,
-                                     - self.r1 / 2 + self.r2,
-                                     - self.r1,
-                                     - self.r1 / 2 - self.r2,
-                                     self.r1 / 2, - self.r2,
-                                     self.r1), axis=1) + self.center
+        r1, r2 = np.expand_dims(self.r1, axis=1), np.expand_dims(self.r2, axis=1)
+        self.edges = np.concatenate((r1,
+                                     r1 / 2 + r2,
+                                     - r1 / 2 + r2,
+                                     - r1,
+                                     - r1 / 2 - r2,
+                                     r1 / 2, - r2,
+                                     r1), axis=1) #+ self.center
 
     def is_point_in_cell(self, points: np.array) -> bool:
         points_norm_abs = np.absolute(self.original_to_normalized(points))
