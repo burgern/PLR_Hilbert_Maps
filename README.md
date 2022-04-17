@@ -10,9 +10,10 @@
 - ~~Ellipse (alpha, primary, secondary)~~
 - ~~Dataset with simple features~~
 - ~~bugfix~~
+- Readme.md
 - lhm tracking of individuals
-- automatic running and testing
 - Cell overlap
+- automatic running and testing
 - global config.ini
 - log
 - metric
