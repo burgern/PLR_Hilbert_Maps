@@ -1,5 +1,7 @@
 # Setup
 1. Set up local paths in config/local_config.py
+2. Create interpreter (root should be PLR_Hilbert_Maps)
+3. 
 
 
 # Todo's
