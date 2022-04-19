@@ -43,6 +43,8 @@ class LocalModel:
         raise NotImplementedError
 
     def train(self, points: np.array, occupancy: np.array):
+        if points.size == 0:
+            return
         dataloader = self.get_dataloader(points, occupancy)  # get data in required pytorch format
         model = self.model.to(self.device)
         optimizer = optim.Adam(model.parameters(), lr=self.lr)
