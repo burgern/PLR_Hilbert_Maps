@@ -1,8 +1,8 @@
 import numpy as np
 import torch
-from PLR_Hilbert_Maps.utils import device_setup
-from PLR_Hilbert_Maps.models import MlpLocal2D, FCN
-from PLR_Hilbert_Maps.data import DataGeneratorRoom, GridManager
+from PLR_Hilbert_Maps.src.utils import device_setup
+from PLR_Hilbert_Maps.src.models import MlpLocal2D
+from PLR_Hilbert_Maps.src.data import DataGeneratorRoom, GridManager
 
 torch.autograd.set_detect_anomaly(True)
 

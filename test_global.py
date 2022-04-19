@@ -1,4 +1,4 @@
-from PLR_Hilbert_Maps.data import GridManager
+from PLR_Hilbert_Maps.src.data import GridManager
 from PLR_Hilbert_Maps.visualizer import VisualizePredictions
 
 

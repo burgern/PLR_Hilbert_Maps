@@ -1,10 +1,6 @@
-from PLR_Hilbert_Maps.hilbert_map import LocalHilbertMap, Square, Rectangle, Ellipsoid, Circle, Hexagon,\
-    LocalHilbertMapCollection
-from PLR_Hilbert_Maps.models import *
-import numpy as np
-import matplotlib.pyplot as plt
-from typing import Tuple
-from PLR_Hilbert_Maps.data import DatasetHexagon
+from PLR_Hilbert_Maps.src.hilbert_map import Square, LocalHilbertMapCollection
+from PLR_Hilbert_Maps.src.models import *
+from PLR_Hilbert_Maps.src.data import DatasetHexagon
 from torch import nn
 import pickle
 

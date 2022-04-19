@@ -1,9 +1,9 @@
 import torch
 from torch.utils.data import DataLoader
-from PLR_Hilbert_Maps.utils import device_setup
-from PLR_Hilbert_Maps.models import MlpLocal2D, FCN
+from PLR_Hilbert_Maps.src.utils import device_setup
+from PLR_Hilbert_Maps.src.models import MlpLocal2D
 from PLR_Hilbert_Maps.training import train, test
-from PLR_Hilbert_Maps.data import DataGeneratorRoom
+from PLR_Hilbert_Maps.src.data import DataGeneratorRoom
 
 
 torch.autograd.set_detect_anomaly(True)

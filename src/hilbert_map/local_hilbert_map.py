@@ -1,6 +1,6 @@
 from .composite_design import Leaf
-from .cell.cell import Cell
-from PLR_Hilbert_Maps.models import LocalModel
+from src.hilbert_map.cell import Cell
+from src.models import LocalModel
 from typing import Optional
 
 import numpy as np

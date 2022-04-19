@@ -1,4 +1,4 @@
-from PLR_Hilbert_Maps.hilbert_map import Leaf
+from src.hilbert_map import Leaf
 
 
 class GlobalModel(Leaf):

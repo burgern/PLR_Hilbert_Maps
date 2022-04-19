@@ -1,5 +1,5 @@
-from PLR_Hilbert_Maps.config import PATH_CONFIG_LOCAL_MODEL
-from PLR_Hilbert_Maps.utils import device_setup
+from config import PATH_CONFIG_LOCAL_MODEL
+from src.utils import device_setup
 from .mlp import MLP
 
 from configparser import ConfigParser
