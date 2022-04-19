@@ -5,6 +5,10 @@ from .map_manager import MapManager, GridMap
 import numpy as np
 from .local_hilbert_map import LocalHilbertMap
 import matplotlib.pyplot as plt
+from typing import Optional
+from PLR_Hilbert_Maps.config import PATH_LOG
+import os
+from pathlib import Path
 
 
 class LocalHilbertMapCollection(Composite):
@@ -43,7 +47,7 @@ class LocalHilbertMapCollection(Composite):
     def evaluate(self):
         raise NotImplementedError
 
-    def plot(self, resolution):
+    def plot(self, resolution, exp_name: Optional[str] = None, name: Optional[str] = None):
         # get grid points
         x = np.linspace(self.map_manager.x_min, self.map_manager.x_max, resolution)
         y = np.linspace(self.map_manager.y_min, self.map_manager.y_max, resolution)
@@ -69,10 +73,19 @@ class LocalHilbertMapCollection(Composite):
         for lhm in self.lhm_collection:
             ax.add_patch(lhm.cell.patch())  # add patches
         plt.axis('scaled')
-        plt.show()
+
+        if exp_name is not None:
+            path_exp = os.path.join(PATH_LOG, exp_name)
+            if not os.path.exists(path_exp):
+                os.makedirs(path_exp)
+                print("created new experiment log folder")
+            path = os.path.join(path_exp, name)
+            plt.savefig(path)
+        # plt.show()
+        plt.close('all')
 
     def is_point_in_collection(self, points: np.array):
         mask = np.zeros(points.shape[1], dtype=bool)
         for lhm in self.lhm_collection:
-            mask = mask | lhm.cell.is_point_in_cell()
+            mask = mask | lhm.cell.is_point_in_cell(points)
         return mask
