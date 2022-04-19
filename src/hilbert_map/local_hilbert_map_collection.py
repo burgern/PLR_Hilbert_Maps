@@ -1,14 +1,13 @@
 from .composite_design import Composite
-from .cell.cell import Cell
-from PLR_Hilbert_Maps.models import LocalModel
-from .map_manager import MapManager, GridMap
+from src.hilbert_map.cell import Cell
+from src.models.local_model import LocalModel
+from .map_manager import GridMap
 import numpy as np
 from .local_hilbert_map import LocalHilbertMap
 import matplotlib.pyplot as plt
 from typing import Optional
-from PLR_Hilbert_Maps.config import PATH_LOG
+from config import PATH_LOG
 import os
-from pathlib import Path
 import pickle
 
 

@@ -1,5 +1,5 @@
 import argparse
-from data.replica_dataset import ReplicaDataSet
+from src.data.replica_dataset import ReplicaDataSet
 import json
 import matplotlib.pyplot as plt
 from numpy.random import randint

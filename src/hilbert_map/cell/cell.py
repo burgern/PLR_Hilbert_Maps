@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 import numpy as np
-from PLR_Hilbert_Maps.utils import concatenate_ones
-from PLR_Hilbert_Maps.config import PATH_CONFIG_CELL
+from src.utils import concatenate_ones
+from config import PATH_CONFIG_CELL
 import matplotlib.patches as patches
 from typing import Optional
 from configparser import ConfigParser

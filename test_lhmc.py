@@ -1,7 +1,8 @@
-from PLR_Hilbert_Maps.hilbert_map import Square, LocalHilbertMapCollection
-from PLR_Hilbert_Maps.models import *
-from PLR_Hilbert_Maps.data import DatasetHexagon
+from src.hilbert_map import Square, LocalHilbertMapCollection
+from src.models import *
+from src.data import DatasetHexagon
 from torch import nn
+import numpy as np
 
 
 class LHMCParam:
@@ -47,22 +48,27 @@ class LHMCParam:
 
 def main():
     # configuration
-    exp_name = "lhmc_test_v009"
-    updates = 20
+    exp_name = "lhmc_test_v011"
+    updates = 3
 
     # parameters to test
-    n = [100000]
+    n = 100000
     size = 5
-    lr = [0.02]
-    epochs = [2]
+    lr = 0.02
+    epochs = 2
 
     # initialize and run simulation
-    for n_ in n:
-        for lr_ in lr:
-            for epochs_ in epochs:
-                simulation = LHMCParam(exp_name=exp_name, updates=updates, cell_width=2, data_n=n_, data_size=size, lr=lr_,
-                                       batch_size=32, epochs=epochs_, x_neighbour_dist=1, y_neighbour_dist=1)
-                simulation.run_simulation()
+    simulation = LHMCParam(exp_name=exp_name, updates=updates, cell_width=2, data_n=n, data_size=size, lr=lr,
+                           batch_size=32, epochs=epochs, x_neighbour_dist=1, y_neighbour_dist=1)
+    simulation.run_simulation()
+
+    # example for prediction
+    points = np.random.uniform(0, 1, (2, 10))
+    pred = simulation.lhmc.predict(points)
+    print('points:')
+    print(points)
+    print('predictions:')
+    print(pred)
 
 
 if __name__ == "__main__":

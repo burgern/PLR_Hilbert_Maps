@@ -1,4 +1,4 @@
-from PLR_Hilbert_Maps.hilbert_map import Square, Rectangle, Circle, Ellipsoid, Hexagon
+from src.hilbert_map import Square, Rectangle, Circle, Ellipsoid, Hexagon
 import numpy as np
 import matplotlib.pyplot as plt
 
