@@ -18,7 +18,7 @@ class DatasetHexagon:
         self.ny = ny
 
         # initialize points
-        self.points = np.random.uniform(-self.size/2 + center[0], self.size/2 + center[1], (2, self.n))
+        self.points = np.random.uniform(-self.size/2, self.size/2, (2, self.n)) + np.array([[center[0]], [center[1]]])
         self.reflectance = np.random.rand(self.n)  # set non-occupied to np.nan
 
         # create wall
@@ -78,6 +78,10 @@ class DatasetHexagon:
         self.points = self.points[:, ~rec_in_mask]
         self.occupancy = self.occupancy[~rec_in_mask]
         self.occupancy = self.occupancy | rec_out.is_point_in_cell(self.points)
+
+    def next(self):
+        self.__init__(self.n, self.size, self.center, self.occlusion_zone, self.nx, self.ny)
+        return self.points, self.occupancy, self.reflectance
 
     def plot(self):
         plt.scatter(self.points[0, :], self.points[1, :], c=self.occupancy, s=1)
