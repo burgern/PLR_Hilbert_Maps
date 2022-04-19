@@ -11,9 +11,11 @@
 - ~~Dataset with simple features~~
 - ~~bugfix~~
 - Readme.md
-- lhm tracking of individuals
-- Cell overlap
-- automatic running and testing
+- ~~lhm tracking of individuals~~
+- ~~automatic running and testing~~
+- ~~Cell overlap~~
+- ~~update (MapManager) should consider previous lhm's~~
+- threshold for each lhm (MapManager)
 - global config.ini
 - log
 - metric

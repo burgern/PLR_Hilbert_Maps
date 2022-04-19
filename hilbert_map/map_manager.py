@@ -9,9 +9,11 @@ class MapManager(ABC):
     Map Manager
     TODO Description
     """
-    def __init__(self, cell_template: Cell):
+    def __init__(self, cell_template: Cell, x_neighbour_dist: float, y_neighbour_dist: float):
         # get params
         self.cell_template = cell_template
+        self.x_neighbour_dist = x_neighbour_dist
+        self.y_neighbour_dist = y_neighbour_dist
 
         self.map_indices = np.empty((2, 0))
         self.x_min, self.x_max = 0, 0
@@ -37,17 +39,19 @@ class GridMap(MapManager):
     """
     Grid Map
     TODO Description
+    Inputs:
+        cell_template:              standard cell which will be added
+        x_neighbour_dist:           cell neighbour distance from center to center in x-direction
+        y_neighbour_dist:           cell neighbour distance from center to center in y-direction
     """
-    def __init__(self, cell_template: Union[Cell, Rectangle]):
-        super(GridMap, self).__init__(cell_template)
+    def __init__(self, cell_template: Union[Cell, Rectangle], x_neighbour_dist: float, y_neighbour_dist: float):
+        super(GridMap, self).__init__(cell_template, x_neighbour_dist, y_neighbour_dist)
 
     def update(self, points: np.array) -> List[Cell]:
         # cells for all points
         new_cells = []
-        x_size = self.cell_template.r1_mag * 2
-        y_size = self.cell_template.r2_mag * 2
-        indices = np.concatenate((np.expand_dims(points[0, :] // x_size, axis=0),
-                                  np.expand_dims(points[1, :] // y_size, axis=0)), axis=0)
+        indices = np.concatenate((np.expand_dims(points[0, :] // self.x_neighbour_dist, axis=0),
+                                  np.expand_dims(points[1, :] // self.y_neighbour_dist, axis=0)), axis=0)
         indices = np.unique(indices, axis=1)
 
         # compare with already existing cells (keep only new cells)
@@ -60,12 +64,12 @@ class GridMap(MapManager):
 
             # new cells
             for center in indices.T:
-                new_cells.append(self.cell_template.new_cell((center[0] * x_size + self.cell_template.r1_mag,
-                                                              center[1] * y_size + self.cell_template.r2_mag)))
+                new_cells.append(self.cell_template.new_cell((center[0] * self.x_neighbour_dist + self.x_neighbour_dist / 2,
+                                                              center[1] * self.y_neighbour_dist + self.y_neighbour_dist / 2)))
 
             # update intervals
-            x_min, x_max = np.min(indices[0, :]) * x_size, (np.max(indices[0, :]) + 1) * x_size
-            y_min, y_max = np.min(indices[1, :]) * y_size, (np.max(indices[1, :]) + 1) * y_size
+            x_min, x_max = np.min(indices[0, :]) * self.x_neighbour_dist, (np.max(indices[0, :]) + 1) * self.x_neighbour_dist
+            y_min, y_max = np.min(indices[1, :]) * self.y_neighbour_dist, (np.max(indices[1, :]) + 1) * self.y_neighbour_dist
             self.update_intervals(x_min, x_max, y_min, y_max)
 
         return new_cells

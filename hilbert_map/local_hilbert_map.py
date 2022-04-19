@@ -12,15 +12,16 @@ class LocalHilbertMap(Leaf):
     Local Hilbert Map
     TODO Description
     """
-    def __init__(self, cell: Cell, local_model: LocalModel):
+    def __init__(self, cell: Cell, local_model: LocalModel, id: Optional[int] = None):
         self.cell = cell
         self.local_model = local_model
+        self.id = id
 
     def update(self, points: np.array, occupancy: np.array):
         points, occupancy = self.preprocessing(points, occupancy)  # preprocessing
-        print(f'training model of cell: x_pos = {self.cell.center[0]}, y_pos = {self.cell.center[1]} --- start')
+        # print(f'training model of cell: x_pos = {self.cell.center[0]}, y_pos = {self.cell.center[1]} --- start')
         self.local_model.train(points, occupancy)  # train local model
-        print(f'training model of cell: x_pos = {self.cell.center[0]}, y_pos = {self.cell.center[1]} --- finish')
+        # print(f'training model of cell: x_pos = {self.cell.center[0]}, y_pos = {self.cell.center[1]} --- finish')
 
     def predict(self, points: np.array):
         points = self.preprocessing(points)
