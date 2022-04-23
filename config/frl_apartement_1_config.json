@@ -1,5 +1,5 @@
 {
   "type": "2d_replica",
   "square_unit_m": 0.002,
-  "path":"dataset/2d_replica/frl_apartment_1"
+  "path": "../dataset/2d_replica/frl_apartment_1"
 }

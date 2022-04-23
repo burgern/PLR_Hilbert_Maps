@@ -1,8 +1,8 @@
-from data.base_dataset import BaseDataSet
-from utils.data_utils import get_all_files_from_directory, get_depth_samples_and_pose_data_from_replica_data_folder
+from src.data.base_dataset import BaseDataSet
+from src.utils.data_utils import get_all_files_from_directory, get_depth_samples_and_pose_data_from_replica_data_folder
 from os.path import join
 from numpy import arange, loadtxt, ones, vstack, load, sin, cos, concatenate
-from utils.math_utils import sample_angles_around_optical_axis, sample_points_in_freespace_for_viewpoint, \
+from src.utils.math_utils import sample_angles_around_optical_axis, sample_points_in_freespace_for_viewpoint, \
     point_cloud_WRT_World, deg_to_rad
 
 class ReplicaDataSet(BaseDataSet):
