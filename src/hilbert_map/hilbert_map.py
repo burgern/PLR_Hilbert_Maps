@@ -1,16 +1,53 @@
 from .composite_design import Composite
-
+from .map_manager import GridMap
+from .local_hilbert_map_collection import LocalHilbertMapCollection
+from PLR_Hilbert_Maps.models.local_model import LocalModel
+from PLR_Hilbert_Maps.models.mlp import MLP
+import torch.nn as nn
+from .cell.square import Square
+import json
+import numpy as np
 
 class HilbertMap(Composite):
     """
     Hilbert Map
-    TODO Description
+    TODO hadzica: Description
     """
-    def __init__(self):
-        raise NotImplementedError
+    def __init__(self, config_path: str):
+        with open(config_path) as f:
+            config = json.load(f)
 
-    def update(self):
-        raise NotImplementedError
+        if config["local_model"]["model"] == "MLP":
+            local_model = MLP()
+        else:
+            # TODO hadzica: Add other cases.
+            raise NotImplementedError
+
+        if config["local_model"]["loss"] == "BCE":
+            local_loss = nn.BCELoss()
+        else:
+            # TODO hadzica: Add other cases.
+            raise NotImplementedError
+
+        if config["cell"]["type"] == "SQUARE":
+            # TODO burgern: Fix correct nx, ny pass.
+            cell = Square(config["cell"]["width"], 0, 0)
+        else:
+            # TODO hadzica: Add other cases.
+            raise NotImplementedError
+
+        local_lr = config["local_model"]["lr"]
+        local_bs = config["local_model"]["batch_size"]
+        local_epochs = config["local_model"]["epochs"]
+
+        map_manager = GridMap(cell)
+        local_map = LocalModel(local_model, local_loss, lr=local_lr, batch_size=local_bs, epochs=local_epochs)
+        self.local_map_collection = LocalHilbertMapCollection(cell, local_map, map_manager)
+
+    def update(self, points: np.array, occupancy: np.array):
+        self.local_map_collection.update(points, occupancy)
+        local_map_outputs = self.local_map_collection.predict(points)
+
 
     def predict(self):
         raise NotImplementedError

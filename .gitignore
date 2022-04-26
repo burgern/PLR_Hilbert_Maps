@@ -1,4 +1,8 @@
-__pycache__
 .idea
 log/
 config/local_config.py
+dataset/
+musi/
+autoencoder/
+.DS_Store
+*__pycache__*

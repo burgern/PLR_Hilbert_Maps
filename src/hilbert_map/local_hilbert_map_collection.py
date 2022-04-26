@@ -42,6 +42,7 @@ class LocalHilbertMapCollection(Composite):
             lhm.update(points, occupancy)
 
     def predict(self, points: np.array):
+        # TODO burgern: Please use torch.tensors as type instead of np to avoid conversions at global level.
         out = np.empty((len(self.lhm_collection), points.shape[1]))
         for lhm_idx, lhm in enumerate(self.lhm_collection):
             out[lhm_idx, :] = lhm.predict_2(points)

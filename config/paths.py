@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from .local_config import LOCAL_PLR, LOCAL_DATA
 
-# project path
 PATH_PLR = os.path.join(Path.home(), LOCAL_PLR)
 
 # log path
