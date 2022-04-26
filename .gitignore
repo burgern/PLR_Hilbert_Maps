@@ -2,3 +2,6 @@ __pycache__
 .idea
 log/
 dataset/
+musi/
+autoencoder/
+.DS_Store
