@@ -4,6 +4,7 @@ import json
 import matplotlib.pyplot as plt
 from numpy.random import randint
 from numpy import concatenate
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test the replica dataset class")
     parser.add_argument('--config', action="store")

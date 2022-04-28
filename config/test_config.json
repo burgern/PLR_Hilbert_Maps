@@ -1,4 +1,4 @@
 {
-  "sensor_config_path": "../config/2d_lidar_config.json",
-  "data_config_path": "../config/frl_apartement_1_config.json"
+  "sensor_config_path": "config/2d_lidar_config.json",
+  "data_config_path": "config/frl_apartement_1_config.json"
 }

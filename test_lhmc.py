@@ -1,6 +1,6 @@
-from src.hilbert_map import Square, LocalHilbertMapCollection
-from src.models import *
-from src.data import DatasetHexagon
+from .src.hilbert_map import Square, LocalHilbertMapCollection
+from .src.models import *
+from .src.data import DatasetHexagon
 from torch import nn
 import numpy as np
 
@@ -26,7 +26,7 @@ class LHMCParam:
         self.cell = Square(center=None, width=self.cell_width, nx=0.5, ny=0.5)
 
         # initialize local model
-        self.local_model = LocalModel(MLP(), nn.BCELoss(), lr=self.lr, batch_size=self.batch_size, epochs=self.epochs)
+        self.local_model = BaseModel(MLP(), nn.BCELoss(), lr=self.lr, batch_size=self.batch_size, epochs=self.epochs)
 
         # initialize local hilbert map collection
         self.lhmc = LocalHilbertMapCollection(self.cell, self.local_model, x_neighbour_dist=self.x_neighbour_dist,
