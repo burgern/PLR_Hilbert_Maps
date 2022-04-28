@@ -17,7 +17,6 @@ def get_depth_samples_and_pose_data_from_replica_data_folder(files_of_replica_da
             depth_samples.append(file)
     return depth_samples, pose_data_file
 
-
 def concatenate_ones(x: np.array, axis: int) -> np.array:
     if axis == 0:
         return np.concatenate((x, np.ones((1, x.shape[1]), dtype=x.dtype)), axis=axis)
@@ -25,7 +24,6 @@ def concatenate_ones(x: np.array, axis: int) -> np.array:
         return np.concatenate((x, np.ones((x.shape[0], 1), dtype=x.dtype)), axis=axis)
     else:
         raise ValueError
-
 
 def concatenate_zeros(x: np.array, axis: int) -> np.array:
     if axis == 0:

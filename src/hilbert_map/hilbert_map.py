@@ -1,8 +1,8 @@
 from .composite_design import Composite
 from .map_manager import GridMap
 from .local_hilbert_map_collection import LocalHilbertMapCollection
-from PLR_Hilbert_Maps.models.local_model import LocalModel
-from PLR_Hilbert_Maps.models.mlp import MLP
+from src.models.base_model import BaseModel
+from src.models.local_model.mlp import MLP
 import torch.nn as nn
 from .cell.square import Square
 import json
@@ -41,7 +41,7 @@ class HilbertMap(Composite):
         local_epochs = config["local_model"]["epochs"]
 
         map_manager = GridMap(cell)
-        local_map = LocalModel(local_model, local_loss, lr=local_lr, batch_size=local_bs, epochs=local_epochs)
+        local_map = BaseModel(local_model, local_loss, lr=local_lr, batch_size=local_bs, epochs=local_epochs)
         self.local_map_collection = LocalHilbertMapCollection(cell, local_map, map_manager)
 
     def update(self, points: np.array, occupancy: np.array):

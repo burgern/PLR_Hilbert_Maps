@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 import numpy as np
-from src.utils import concatenate_ones
+from src.utils.data_utils import concatenate_ones
 from config import PATH_CONFIG_CELL
 import matplotlib.patches as patches
 from typing import Optional

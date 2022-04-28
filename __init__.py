@@ -1,3 +1,3 @@
 from . import config
-from .src import data, hilbert_map, loss, models, utils
+from .src import data, hilbert_map, models, utils
 from . import training

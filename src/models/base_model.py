@@ -1,6 +1,6 @@
 from config import PATH_CONFIG_LOCAL_MODEL
-from src.utils import device_setup
-from .mlp import MLP
+from src.utils.device_setup import device_setup
+from .local_model.mlp import MLP
 
 from configparser import ConfigParser
 import numpy as np

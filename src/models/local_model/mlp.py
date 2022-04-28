@@ -1,6 +1,5 @@
 from torch import nn
 
-
 class MLP(nn.Module):
     """
         Neural Net for local map representation within 2 dimensions

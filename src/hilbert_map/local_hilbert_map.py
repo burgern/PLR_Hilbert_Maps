@@ -1,6 +1,6 @@
 from .composite_design import Leaf
 from src.hilbert_map.cell import Cell
-from src.models import LocalModel
+from src.models.base_model import BaseModel
 from typing import Optional
 
 import numpy as np
@@ -12,7 +12,7 @@ class LocalHilbertMap(Leaf):
     Local Hilbert Map
     TODO Description
     """
-    def __init__(self, cell: Cell, local_model: LocalModel, id: Optional[int] = None):
+    def __init__(self, cell: Cell, local_model: BaseModel, id: Optional[int] = None):
         self.cell = cell
         self.local_model = local_model
         self.id = id

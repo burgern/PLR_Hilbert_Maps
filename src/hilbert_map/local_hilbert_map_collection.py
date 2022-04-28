@@ -1,6 +1,6 @@
 from .composite_design import Composite
 from src.hilbert_map.cell import Cell
-from src.models.local_model import LocalModel
+from src.models.base_model import BaseModel
 from .map_manager import GridMap
 import numpy as np
 from .local_hilbert_map import LocalHilbertMap
@@ -16,7 +16,7 @@ class LocalHilbertMapCollection(Composite):
     Local Hilbert Map Collection
     TODO Description
     """
-    def __init__(self, cell_template: Cell, local_model: LocalModel, x_neighbour_dist: float,
+    def __init__(self, cell_template: Cell, local_model: BaseModel, x_neighbour_dist: float,
                  y_neighbour_dist: float, map_manager: str = 'GridMap'):
         # get params
         self.cell_template = cell_template
