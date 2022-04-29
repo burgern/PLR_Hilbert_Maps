@@ -6,6 +6,13 @@
     "batch_size": 32,
     "epochs": 10
   },
+  "global_map": {
+    "model": "LogisticRegression",
+    "loss": "BCE",
+    "lr": 0.005,
+    "batch_size": 32,
+    "epochs": 10
+  },
   "cell": {
     "type": "SQUARE",
     "width": 0.2

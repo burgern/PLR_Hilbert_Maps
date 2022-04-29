@@ -1,6 +1,7 @@
 from .composite_design import Composite
 from .map_manager import GridMap
 from .local_hilbert_map_collection import LocalHilbertMapCollection
+from ..models.global_model.logistic_regression import LogisticRegression
 from src.models.base_model import BaseModel
 from src.models.local_model.mlp import MLP
 import torch.nn as nn
@@ -36,6 +37,12 @@ class HilbertMap(Composite):
             # TODO hadzica: Add other cases.
             raise NotImplementedError
 
+        if config["global"]["loss"] == "BCE":
+            global_loss = nn.BCELoss()
+        if config["global"]["model"] == "LogisticRegression":
+            global_config = config["global"]
+            self.global_map = LogisticRegression(global_config, global_loss)
+
         local_lr = config["local_model"]["lr"]
         local_bs = config["local_model"]["batch_size"]
         local_epochs = config["local_model"]["epochs"]
@@ -47,7 +54,7 @@ class HilbertMap(Composite):
     def update(self, points: np.array, occupancy: np.array):
         self.local_map_collection.update(points, occupancy)
         local_map_outputs = self.local_map_collection.predict(points)
-
+        self.global_map.update(local_map_outputs, occupancy)
 
     def predict(self):
         raise NotImplementedError
