@@ -1,6 +1,6 @@
-from .src.hilbert_map import Square, LocalHilbertMapCollection
-from .src.models import *
-from .src.data import DatasetHexagon
+from src.hilbert_map import Square, LocalHilbertMapCollection
+from src.models import *
+from src.data import DatasetHexagon
 from torch import nn
 import numpy as np
 
