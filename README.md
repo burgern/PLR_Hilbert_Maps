@@ -6,22 +6,12 @@
 
 # Todo's
 ### Amir
-- P2: Logistic Regression
-- Loss
+- Logistic Regression
+- plot function in composite
+- config
+- Replica Data fix
 ### Nico
-- ~~Ellipse (alpha, primary, secondary)~~
-- ~~Dataset with simple features~~
-- ~~bugfix~~
-- Readme.md
-- ~~lhm tracking of individuals~~
-- ~~automatic running and testing~~
-- ~~Cell overlap~~
-- ~~update (MapManager) should consider previous lhm's~~
-- threshold for each lhm (MapManager)
-- global config.ini
-- log
-- metric
-  - roc
-  - pr
-- GUI (pyQT5)
-- default nx, ny
+- Evaluation
+
+### Backlog
+- Intel Data
