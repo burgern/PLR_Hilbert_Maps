@@ -1,20 +1,25 @@
 {
-  "local_map": {
+  "local": {
     "model": "MLP",
     "loss": "BCE",
-    "lr": 0.005,
+    "lr": 0.01,
     "batch_size": 32,
     "epochs": 10
   },
-  "global_map": {
+  "global": {
     "model": "LogisticRegression",
     "loss": "BCE",
-    "lr": 0.005,
+    "lr": 0.001,
     "batch_size": 32,
-    "epochs": 10
+    "epochs": 10,
+    "overlap_in_x": 1,
+    "overlap_in_y": 1
   },
   "cell": {
     "type": "SQUARE",
-    "width": 0.2
+    "width": 2,
+    "nx": 0.5,
+    "ny": 0.5,
+    "center": "None"
   }
 }
