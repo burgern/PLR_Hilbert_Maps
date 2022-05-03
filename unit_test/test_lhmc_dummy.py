@@ -48,14 +48,14 @@ class LHMCParam:
 
 def main():
     # configuration
-    exp_name = "lhmc_test_v011"
-    updates = 3
+    exp_name = "lhmc_test_v000"
+    updates = 20
 
     # parameters to test
     n = 100000
     size = 5
     lr = 0.02
-    epochs = 2
+    epochs = 3
 
     # initialize and run simulation
     simulation = LHMCParam(exp_name=exp_name, updates=updates, cell_width=2, data_n=n, data_size=size, lr=lr,
