@@ -25,6 +25,7 @@ class MapManager(ABC):
         raise NotImplementedError
 
     def update_intervals(self, x_min, x_max, y_min, y_max):
+        # TODO if x_min and y_min are more than 0, 0 we currently plot too much
         if x_min < self.x_min:
             self.x_min = x_min
         if x_max > self.x_max:
