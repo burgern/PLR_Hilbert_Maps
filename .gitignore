@@ -1,6 +1,5 @@
 .idea
 log/
-config/local_config.py
 dataset/
 musi
 autoencoder
