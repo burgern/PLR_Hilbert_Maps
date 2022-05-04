@@ -48,7 +48,6 @@ class BaseModel(nn.Module):
             return
         dataloader = self.get_dataloader(points, occupancy)  # get data in required pytorch format
         model = self.model.to(self.device)
-        optimizer = optim.Adam(model.parameters(), lr=self.lr)
 
         # train model
         for t in range(self.epochs):
@@ -62,6 +61,8 @@ class BaseModel(nn.Module):
                 loss = self.loss_fn(pred, y)
 
                 # Backpropagation
+                # We have to reinitialize the optimizer, since we can have new parameters during runtime.
+                optimizer = optim.Adam(model.parameters(), lr=self.lr)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
