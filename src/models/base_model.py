@@ -43,22 +43,25 @@ class BaseModel(nn.Module):
     def evaluate(self):
         raise NotImplementedError
 
-    def train(self, points: np.array, occupancy: np.array):
+    def train(self, points: np.array, occupancy: np.array, print_loss: bool = False):
         if points.size == 0:
             return
         dataloader = self.get_dataloader(points, occupancy)  # get data in required pytorch format
         model = self.model.to(self.device)
 
         # train model
+        loss_per_epoch = []
         for t in range(self.epochs):
             print(f'Epoch: {t+1} of {self.epochs}', end='\r')
             model.train()
+            loss_per_batch = []
             for batch, (x, y) in enumerate(dataloader):
                 x, y = x.to(self.device), y.to(self.device)
 
                 # Compute prediction error
                 pred = model(x)
                 loss = self.loss_fn(pred, y)
+                loss_per_batch.append(loss)
 
                 # Backpropagation
                 # We have to reinitialize the optimizer, since we can have new parameters during runtime.
@@ -66,6 +69,11 @@ class BaseModel(nn.Module):
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+            mean_loss_in_epoch = sum(loss_per_batch) / len(loss_per_batch)
+            if print_loss:
+                print(mean_loss_in_epoch)
+            loss_per_epoch.append(mean_loss_in_epoch)
+
         self.model = model
 
     def get_dataloader(self, points: np.array, occupancy: np.array):
