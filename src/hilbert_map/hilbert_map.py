@@ -15,6 +15,7 @@ class HilbertMap(Composite):
     TODO hadzica: Description
     """
     def __init__(self, config_path: str):
+        super().__init__()
         with open(config_path) as f:
             config = json.load(f)
 
@@ -71,16 +72,29 @@ class HilbertMap(Composite):
     def update(self, points: np.array, occupancy: np.array):
         self.local_map_collection.update(points, occupancy)
         local_map_outputs = self.local_map_collection.predict(points)
-        self.global_map.train(local_map_outputs, occupancy)
+        self.global_map.train(local_map_outputs, occupancy, print_loss=True)
 
-    def predict(self):
-        raise NotImplementedError
+        self.x_limits["min"] = self.local_map_collection.map_manager.x_min
+        self.x_limits["max"] = self.local_map_collection.map_manager.x_max
+        self.y_limits["min"] = self.local_map_collection.map_manager.y_min
+        self.y_limits["max"] = self.local_map_collection.map_manager.y_max
+
+    def predict(self, points: np.array):
+        local_map_outputs = self.local_map_collection.predict(points)
+        predictions = self.global_map.predict(local_map_outputs)
+        return predictions
+
+    def predict_meshgrid(self, points: np.array):
+        zz = self.predict(points)
+        size = int(np.sqrt(zz.shape[0]))
+        zz = zz.reshape(size, size)
+        return zz
 
     def evaluate(self):
         raise NotImplementedError
 
-    def plot(self):
-        raise NotImplementedError
-
     def log(self):
         raise NotImplementedError
+
+    def get_lhm_collection(self):
+        return self.local_map_collection.lhm_collection

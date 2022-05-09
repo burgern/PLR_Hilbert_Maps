@@ -4,8 +4,6 @@ from src.models.base_model import BaseModel
 from .map_manager import GridMap
 import numpy as np
 from .local_hilbert_map import LocalHilbertMap
-import matplotlib.pyplot as plt
-from typing import Optional
 from config import PATH_LOG
 import os
 import pickle
@@ -18,6 +16,7 @@ class LocalHilbertMapCollection(Composite):
     """
     def __init__(self, cell_template: Cell, local_model: BaseModel, x_neighbour_dist: float,
                  y_neighbour_dist: float, map_manager: str = 'GridMap'):
+        super().__init__()
         # get params
         self.cell_template = cell_template
         self.local_model = local_model
@@ -41,24 +40,18 @@ class LocalHilbertMapCollection(Composite):
         for lhm in self.lhm_collection:
             lhm.update(points, occupancy)
 
+        self.x_limits["min"] = self.map_manager.x_min
+        self.x_limits["max"] = self.map_manager.x_max
+        self.y_limits["min"] = self.map_manager.y_min
+        self.y_limits["max"] = self.map_manager.y_max
+
     def predict(self, points: np.array):
-        # TODO burgern: Please use torch.tensors as type instead of np to avoid conversions at global level.
         out = np.empty((len(self.lhm_collection), points.shape[1]))
         for lhm_idx, lhm in enumerate(self.lhm_collection):
             out[lhm_idx, :] = lhm.predict_2(points)
         return out
 
-    def evaluate(self):
-        raise NotImplementedError
-
-    def plot(self, resolution, exp_name: Optional[str] = None, name: Optional[str] = None, show_patch: bool = True,
-             show_id: bool = True):
-        # get grid points
-        x = np.linspace(self.map_manager.x_min, self.map_manager.x_max, resolution)
-        y = np.linspace(self.map_manager.y_min, self.map_manager.y_max, resolution)
-        xx, yy = np.meshgrid(x, y)
-        points = np.concatenate((np.expand_dims(xx.flatten(), axis=0), np.expand_dims(yy.flatten(), axis=0)), axis=0)
-
+    def predict_meshgrid(self, points: np.array):
         # get predictions
         zz = np.empty((points.shape[1],))
         zz[:] = np.nan
@@ -67,31 +60,13 @@ class LocalHilbertMapCollection(Composite):
             points_in_cell = points[:, mask]
             zz_in_cell = np.squeeze(lhm.predict(points_in_cell))
             zz[mask] = zz_in_cell
-        zz = zz.reshape(len(y), len(x))
+        size = int(np.sqrt(zz.shape[0]))
+        zz = zz.reshape(size, size)
         #zz = np.nan_to_num(zz, nan=-1.0)  # nan values are points where no predictions
+        return zz
 
-        # plot
-        plt.close('all')
-        fig, ax = plt.subplots(figsize=(10, 5))
-        ax.set_facecolor('lightcoral')
-        mapping = ax.contourf(x, y, zz, levels=10, cmap='binary')
-        fig.colorbar(mapping)
-        for lhm in self.lhm_collection:
-            if show_patch:
-                ax.add_patch(lhm.cell.patch())  # add patches
-            if show_id:
-                ax.text(lhm.cell.center[0], lhm.cell.center[1], str(lhm.id), color="blue", fontsize=12)
-        plt.axis('scaled')
-
-        if exp_name is not None:
-            path_exp = os.path.join(PATH_LOG, exp_name)
-            if not os.path.exists(path_exp):
-                os.makedirs(path_exp)
-                print("created new experiment log folder")
-            path = os.path.join(path_exp, name)
-            plt.savefig(path)
-        else:
-            plt.show()
+    def evaluate(self):
+        raise NotImplementedError
 
     def is_point_in_collection(self, points: np.array):
         mask = np.zeros(points.shape[1], dtype=bool)
@@ -108,3 +83,6 @@ class LocalHilbertMapCollection(Composite):
             path = os.path.join(path_exp, name)
         with open(path, "wb") as f:
             pickle.dump(self, f)
+
+    def get_lhm_collection(self):
+        return self.lhm_collection
