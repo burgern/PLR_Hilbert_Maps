@@ -3,15 +3,14 @@ from src.models import *
 from src.data import DatasetHexagon
 from torch import nn
 import numpy as np
-import os
-import matplotlib.pyplot as plt
-from config import PATH_LOG, load_config
+from config import load_config
 import pickle
+from evaluation import Logger
 
 
 def main():
     # configuration
-    exp_name = "lhmc_v100"
+    exp_name = "lhmc_v101"
 
     # load config
     config = load_config()
@@ -36,25 +35,16 @@ def main():
                                      x_neighbour_dist=config_map_manager["x_neighbour_dist"],
                                      y_neighbour_dist=config_map_manager["y_neighbour_dist"])
 
+    # logger setup
+    logger = Logger(exp_name=exp_name, config=config)
+
     # run local hilbert map collection
     points_total, occupancy_total = np.empty((2, 0)), np.empty(0)
-    path_exp = os.path.join(PATH_LOG, exp_name)
 
     for i in range(updates):
-        # update data
-        points, occupancy, _ = data.next()
+        points, occupancy, _ = data.next()  # update data
 
-        # update lhmc
-        lhmc.update(points, occupancy)
-
-        # plot lhmc and new data
-        lhmc.plot(1001, exp_name, f'iteration_{i:03}.png', show_id=False)
-        plt.close('all')
-        plt.scatter(points_total[0, :], points_total[1, :], c=occupancy_total, s=1, cmap='viridis')
-        plt.scatter(points[0, :], points[1, :], c=occupancy, s=1, cmap='cool')
-        path = os.path.join(path_exp, f'viewpoint_{i:03}.png')
-        plt.axis('scaled')
-        plt.savefig(path)
+        lhmc.update(points, occupancy)  # update lhmc
 
         # update dataset
         points_total = np.hstack((points_total, points))
@@ -62,11 +52,13 @@ def main():
 
         print(f'iteration: {i} done')
 
-    # save lhmc
-    with open('lhmc.pkl', 'wb') as file:
-        pickle.dump(lhmc, file)
+        # log data, lhm, lhmc and map_manager
+        logger.update(data=np.vstack((points, occupancy)),
+                      lhm=lhmc.lhm_collection,
+                      lhmc=lhmc,
+                      map_manager=lhmc.map_manager)
 
-    lhmc.evaluate(points_total, occupancy_total)
+    logger.save_as_pickle(file_name="lhmc.pkl", source=lhmc)
 
 
 if __name__ == "__main__":

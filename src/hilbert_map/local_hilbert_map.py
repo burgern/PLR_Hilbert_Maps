@@ -23,9 +23,13 @@ class LocalHilbertMap(Leaf):
         self.local_model.train(points, occupancy)  # train local model
         # print(f'training model of cell: x_pos = {self.cell.center[0]}, y_pos = {self.cell.center[1]} --- finish')
 
-    def predict(self, points: np.array):
-        points = self.preprocessing(points)
-        return self.local_model.predict(points)
+    def predict(self, points: np.array, occupancy: Optional[np.array] = None):
+        if occupancy is not None:
+            points_masked, occupancy_masked = self.preprocessing(points, occupancy)
+            return self.local_model.predict(points_masked), occupancy_masked
+        else:
+            points = self.preprocessing(points)
+            return self.local_model.predict(points)
 
     def predict_2(self, points: np.array):
         out = np.empty(points.shape[1])

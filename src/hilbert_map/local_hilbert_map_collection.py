@@ -1,13 +1,12 @@
-from .composite_design import Composite
 from src.hilbert_map.cell import Cell
 from src.models.base_model import BaseModel
+from src.hilbert_map import Composite
 from .map_manager import GridMap
 import numpy as np
 from .local_hilbert_map import LocalHilbertMap
 from config import PATH_LOG
 import os
 import pickle
-from typing import Optional
 
 
 class LocalHilbertMapCollection(Composite):
@@ -25,6 +24,8 @@ class LocalHilbertMapCollection(Composite):
 
         self.prev_id = -1
         self.lhm_collection = []  # store all local hilbert maps in list
+        self.x_limits = {"min": 0, "max": 0}
+        self.y_limits = {"min": 0, "max": 0}
 
     def update(self, points: np.array, occupancy: np.array):
         # check for points which are not within Leafs (LocalHilbertMaps)
@@ -52,8 +53,7 @@ class LocalHilbertMapCollection(Composite):
             out[lhm_idx, :] = lhm.predict_2(points)
         return out
 
-    def plot(self, resolution, exp_name: Optional[str] = None, name: Optional[str] = None, show_patch: bool = True,
-             show_id: bool = True):
+    def predict_meshgrid(self, resolution):
         # get grid points
         x = np.linspace(self.map_manager.x_min, self.map_manager.x_max, resolution)
         y = np.linspace(self.map_manager.y_min, self.map_manager.y_max, resolution)
@@ -71,10 +71,7 @@ class LocalHilbertMapCollection(Composite):
         size = int(np.sqrt(zz.shape[0]))
         zz = zz.reshape(size, size)
         #zz = np.nan_to_num(zz, nan=-1.0)  # nan values are points where no predictions
-        return zz
-
-    def evaluate(self):
-        raise NotImplementedError
+        return x, y, zz
 
     def is_point_in_collection(self, points: np.array):
         mask = np.zeros(points.shape[1], dtype=bool)
