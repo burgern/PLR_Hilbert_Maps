@@ -25,5 +25,14 @@
   "map_manager": {
     "x_neighbour_dist": 1,
     "y_neighbour_dist": 1
+  },
+  "dataset": {
+    "dummy": {
+      "updates": 200,
+      "points": 10000,
+      "size": 5,
+      "center_x": 0,
+      "center_y": 0
+    }
   }
 }

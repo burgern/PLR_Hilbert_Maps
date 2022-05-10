@@ -15,11 +15,14 @@ def main():
 
     # load config
     config = load_config()
-    config_local, config_cell, config_map_manager = config["local"], config["cell"], config["map_manager"]
+    config_local, config_cell = config["local"], config["cell"]
+    config_map_manager, config_dataset = config["map_manager"], config["dataset"]["dummy"]
 
     # load dataset
-    updates = 200
-    data = DatasetHexagon(10000, 5, (0, 0))
+    updates = config_dataset["updates"]
+    data = DatasetHexagon(n=config_dataset["points"],
+                          size=config_dataset["size"],
+                          center=(config_dataset["center_x"], config_dataset["center_y"]))
 
     # lhmc setup
     cell = Square(center=config_cell["center"],
