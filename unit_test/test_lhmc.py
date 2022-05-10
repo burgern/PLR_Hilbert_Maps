@@ -1,43 +1,45 @@
-import random
-
 from src.hilbert_map import Square, LocalHilbertMapCollection
 from src.models import *
 from src.data import DatasetHexagon
 from torch import nn
 import numpy as np
-from src.data.replica_dataset import ReplicaDataSet
-from config import PATH_CONFIG
 import os
-import json
 import matplotlib.pyplot as plt
-from config import PATH_LOG
+from config import PATH_LOG, load_config
 import pickle
 
 
 def main():
     # configuration
-    exp_name = "lhmc_test_v016"
+    exp_name = "lhmc_v100"
+
+    # load config
+    config = load_config()
+    config_local, config_cell, config_map_manager = config["local"], config["cell"], config["map_manager"]
 
     # load dataset
-    nr_of_viewpoints = 200
-    config_path = os.path.join(PATH_CONFIG, 'test_config.json')
-    with open(config_path) as f:
-        config = json.load(f)
-    data = ReplicaDataSet(config)
+    updates = 200
+    data = DatasetHexagon(10000, 5, (0, 0))
 
     # lhmc setup
-    cell = Square(center=None, width=1, nx=0.5, ny=0.5)
-    local_model = LocalModel(MLP(), nn.BCELoss(), lr=0.05, batch_size=32, epochs=1)
-    lhmc = LocalHilbertMapCollection(cell, local_model, x_neighbour_dist=1, y_neighbour_dist=1)
+    cell = Square(center=config_cell["center"],
+                  width=config_cell["width"],
+                  nx=config_cell["nx"], ny=config_cell["ny"])
+    local_model = BaseModel(MLP(), nn.BCELoss(),
+                            lr=config_local["lr"],
+                            batch_size=config_local["batch_size"],
+                            epochs=config_local["epochs"])
+    lhmc = LocalHilbertMapCollection(cell, local_model,
+                                     x_neighbour_dist=config_map_manager["x_neighbour_dist"],
+                                     y_neighbour_dist=config_map_manager["y_neighbour_dist"])
 
     # run local hilbert map collection
     points_total, occupancy_total = np.empty((2, 0)), np.empty(0)
     path_exp = os.path.join(PATH_LOG, exp_name)
 
-    for i in range(nr_of_viewpoints):
+    for i in range(updates):
         # update data
-        data_step = data.__getitem__(i)
-        points, occupancy = data_step[:2, :], data_step[2, :]
+        points, occupancy, _ = data.next()
 
         # update lhmc
         lhmc.update(points, occupancy)
