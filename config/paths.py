@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
-from .local_config import LOCAL_PLR
 
+LOCAL_PLR = Path(__file__).resolve().parent.parent
 PATH_PLR = os.path.join(Path.home(), LOCAL_PLR)
 
 # log path
