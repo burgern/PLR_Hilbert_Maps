@@ -7,6 +7,7 @@ from .local_hilbert_map import LocalHilbertMap
 from config import PATH_LOG
 import os
 import pickle
+from typing import Optional
 
 
 class LocalHilbertMapCollection(Composite):
@@ -51,7 +52,14 @@ class LocalHilbertMapCollection(Composite):
             out[lhm_idx, :] = lhm.predict_2(points)
         return out
 
-    def predict_meshgrid(self, points: np.array):
+    def plot(self, resolution, exp_name: Optional[str] = None, name: Optional[str] = None, show_patch: bool = True,
+             show_id: bool = True):
+        # get grid points
+        x = np.linspace(self.map_manager.x_min, self.map_manager.x_max, resolution)
+        y = np.linspace(self.map_manager.y_min, self.map_manager.y_max, resolution)
+        xx, yy = np.meshgrid(x, y)
+        points = np.concatenate((np.expand_dims(xx.flatten(), axis=0), np.expand_dims(yy.flatten(), axis=0)), axis=0)
+
         # get predictions
         zz = np.empty((points.shape[1],))
         zz[:] = np.nan

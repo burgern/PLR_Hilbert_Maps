@@ -36,9 +36,6 @@ class LocalHilbertMap(Leaf):
             out[mask] = x
         return out
 
-    def evaluate(self):
-        raise NotImplementedError
-
     def plot(self, size_x: float, size_y: float, resolution: int):
         # get grid points
         x = np.linspace(self.cell.center[0] - size_x / 2, self.cell.center[0] + size_x / 2, resolution)

@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-import numpy as np
 from typing import Optional
-import matplotlib.pyplot as plt
 import os
 from config import PATH_LOG
+from sklearn import metrics
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Component(ABC):
@@ -20,9 +21,22 @@ class Component(ABC):
     def predict(self):
         raise NotImplementedError
 
-    @abstractmethod
-    def evaluate(self):
-        raise NotImplementedError
+    def evaluate(self, points: np.array, occupancy: np.array):
+        pred = self.predict(points)
+
+        # roc
+        fpr, tpr, thresholds = metrics.roc_curve(occupancy, pred)
+        roc_display = metrics.RocCurveDisplay(fpr=fpr, tpr=tpr).plot()
+
+        # pr
+        prec, recall, _ = metrics.precision_recall_curve(occupancy, pred)
+        pr_display = metrics.PrecisionRecallDisplay(precision=prec, recall=recall).plot()
+
+        # plot
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8))
+        roc_display.plot(ax=ax1)
+        pr_display.plot(ax=ax2)
+        plt.show()
 
     @abstractmethod
     def plot(self):
@@ -92,9 +106,6 @@ class Leaf(Component):
         raise NotImplementedError
 
     def predict(self):
-        raise NotImplementedError
-
-    def evaluate(self):
         raise NotImplementedError
 
     def plot(self):
