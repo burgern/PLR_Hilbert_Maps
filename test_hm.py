@@ -9,6 +9,7 @@ def main(args):
     data = DatasetHexagon(n, size, (0, 0))
     hilbert_map.update(data.points, data.occupancy)
     hilbert_map.plot(1001)
+    hilbert_map.local_map_collection.plot(1001)
 
 
 if __name__ == "__main__":
