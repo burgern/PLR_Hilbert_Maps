@@ -4,14 +4,14 @@
     "loss": "BCE",
     "lr": 0.01,
     "batch_size": 32,
-    "epochs": 10
+    "epochs": 4
   },
   "global": {
     "model": "LogisticRegression",
-    "loss": "BCE",
-    "lr": 0.001,
-    "batch_size": 32,
-    "epochs": 10,
+    "loss": "BCEWithLogitsLoss",
+    "lr": 0.1,
+    "batch_size": 2048,
+    "epochs": 30,
     "overlap_in_x": 1,
     "overlap_in_y": 1
   },
