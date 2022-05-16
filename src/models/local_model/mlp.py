@@ -15,5 +15,5 @@ class MLP(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, x):
+    def forward(self, x, inference=None):
         return self.linear_relu_stack(x)

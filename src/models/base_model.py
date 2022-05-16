@@ -36,7 +36,7 @@ class BaseModel(nn.Module):
         x = torch.Tensor(points.T)
         self.model.eval()
         with torch.no_grad():
-            pred = self.model(x)
+            pred = self.model(x, inference=True)
         pred_np = pred.cpu().detach().numpy()
         return pred_np
 
@@ -51,6 +51,7 @@ class BaseModel(nn.Module):
 
         # train model
         loss_per_epoch = []
+        optimizer = optim.Adam(model.parameters(), lr=self.lr)
         for t in range(self.epochs):
             print(f'Epoch: {t+1} of {self.epochs}', end='\r')
             model.train()

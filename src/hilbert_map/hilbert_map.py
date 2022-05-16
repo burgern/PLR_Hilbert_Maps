@@ -5,6 +5,7 @@ from ..models.global_model.logistic_regression import LogisticRegression
 from src.models.base_model import BaseModel
 from src.models.local_model.mlp import MLP
 import torch.nn as nn
+from torch import no_grad
 from .cell.square import Square
 import json
 import numpy as np
@@ -44,6 +45,8 @@ class HilbertMap(Composite):
 
         if config["global"]["loss"] == "BCE":
             global_loss = nn.BCELoss()
+        elif config["global"]["loss"] == "BCEWithLogitsLoss":
+            global_loss = nn.BCEWithLogitsLoss()
         else:
             # TODO hadzica: Add other cases.
             raise NotImplementedError
@@ -71,7 +74,8 @@ class HilbertMap(Composite):
 
     def update(self, points: np.array, occupancy: np.array):
         self.local_map_collection.update(points, occupancy)
-        local_map_outputs = self.local_map_collection.predict(points)
+        with no_grad():
+            local_map_outputs = self.local_map_collection.predict(points)
         self.global_map.train(local_map_outputs, occupancy, print_loss=True)
 
         self.x_limits["min"] = self.local_map_collection.map_manager.x_min
