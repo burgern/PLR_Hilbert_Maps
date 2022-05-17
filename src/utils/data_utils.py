@@ -32,3 +32,21 @@ def concatenate_zeros(x: np.array, axis: int) -> np.array:
         return np.concatenate((x, np.zeros((x.shape[0], 1), dtype=x.dtype)), axis=axis)
     else:
         raise ValueError
+
+
+def parse_carmen_log(fname):
+    """Parses a CARMEN log file and extracts poses and laser scans.
+
+    :param fname the path to the log file to parse
+    :return poses and scans extracted from the log file
+    """
+    poses = []
+    scans = []
+    for line in open(fname):
+        if line.startswith("FLASER"):
+            arr = line.split()
+            count = int(arr[1])
+            poses.append([float(v) for v in arr[-9:-6]])
+            scans.append([float(v) for v in arr[2:2 + count]])
+
+    return poses, scans

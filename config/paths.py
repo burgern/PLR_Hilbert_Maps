@@ -10,6 +10,9 @@ if not os.path.exists(PATH_LOG):
     os.makedirs(PATH_LOG)
     print("Required models/log folder created for future model logs")
 
+# data path
+PATH_DATA = os.path.join(PATH_PLR, "dataset")
+
 # config paths
 PATH_CONFIG = os.path.join(PATH_PLR, 'config')
 PATH_CONFIG_LOCAL_MODEL = os.path.join(PATH_CONFIG, 'local_model.ini')
