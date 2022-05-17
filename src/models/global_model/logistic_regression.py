@@ -1,5 +1,5 @@
 from ..base_model import BaseModel
-from torch import nn, zeros, cat, matmul, nan_to_num, randn, sigmoid, ones, sum, isnan, unique
+from torch import nn, zeros, cat, matmul, nan_to_num, randn, sigmoid, ones, sum, isnan, unique, relu
 import matplotlib.pyplot as plt
 
 class LogisticRegression(nn.Module):
@@ -12,7 +12,7 @@ class LogisticRegression(nn.Module):
         super(LogisticRegression, self).__init__()
         scalar = randn(1)
         self.bias = nn.Parameter(scalar)
-        self.weights_pool = nn.Parameter(randn(100))
+        self.weights_pool = nn.Parameter(ones(100))
         self.weights_pool_counter = 0
         self.weights = []
         self.weight_history = []
@@ -34,7 +34,7 @@ class LogisticRegression(nn.Module):
                 self.weights_pool_counter += 1
 
     def calculate_linear_combination(self, local_map_predictions):
-        weights = cat(self.weights)
+        weights = relu(cat(self.weights))
         self.weight_history.append(weights.unsqueeze(-1))
         number_of_valid_predictions_per_point = sum(isnan(local_map_predictions) == False, dim=1)
         occuring_numbers = unique(number_of_valid_predictions_per_point)
@@ -61,7 +61,7 @@ class LogisticRegression(nn.Module):
         for idx_ten in range(number_of_packages_of_ten):
             legend = []
             for weight_history in weights_history_tensor[idx_ten * 10:(idx_ten + 1) * 10]:
-                plt.plot(weight_history.detach().numpy())
+                plt.plot(weight_history.detach().numpy(), linewidth=0.5)
                 legend.append(weight_idx)
                 weight_idx += 1
             plt.legend(legend)
