@@ -1,6 +1,6 @@
 .idea
 log/
-dataset/
+dataset/2d_replica
 musi
 autoencoder
 .DS_Store
