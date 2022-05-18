@@ -2,6 +2,7 @@ from .composite_design import Composite
 from .map_manager import GridMap
 from .local_hilbert_map_collection import LocalHilbertMapCollection
 from ..models.global_model.logistic_regression import LogisticRegression
+from ..models.global_model.average_layer import AverageLayer
 from src.models.base_model import BaseModel
 from src.models.local_model.mlp import MLP
 import torch.nn as nn
@@ -51,16 +52,17 @@ class HilbertMap(Composite):
             # TODO hadzica: Add other cases.
             raise NotImplementedError
 
+        global_lr = config["global"]["lr"]
+        global_bs = config["global"]["batch_size"]
+        global_epochs = config["global"]["epochs"]
         if config["global"]["model"] == "LogisticRegression":
-            global_lr = config["global"]["lr"]
-            global_bs = config["global"]["batch_size"]
-            global_epochs = config["global"]["epochs"]
             global_model = LogisticRegression()
-            self.global_map = BaseModel(global_model, global_loss, global_lr, global_bs, global_epochs)
+        elif config["global"]["model"] == "AverageLayer":
+            global_model = AverageLayer()
         else:
             # TODO hadzica: Add other cases.
             raise NotImplementedError
-
+        self.global_map = BaseModel(global_model, global_loss, global_lr, global_bs, global_epochs)
         x_neighbour_dist = config["global"]["overlap_in_x"]
         y_neighbour_dist = config["global"]["overlap_in_y"]
 
@@ -76,6 +78,9 @@ class HilbertMap(Composite):
         self.local_map_collection.update(points, occupancy)
         with no_grad():
             local_map_outputs = self.local_map_collection.predict(points)
+        #np.save("local_map_predictions", local_map_outputs)
+        #np.save("local_map_points", points)
+        #np.save("local_map_groundtruth", occupancy)
         self.global_map.train(local_map_outputs, occupancy, print_loss=True)
 
         self.x_limits["min"] = self.local_map_collection.map_manager.x_min
