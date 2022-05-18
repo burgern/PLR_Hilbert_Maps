@@ -53,13 +53,7 @@ class LocalHilbertMapCollection(Composite):
             out[lhm_idx, :] = lhm.predict_2(points)
         return out
 
-    def predict_meshgrid(self, resolution):
-        # get grid points
-        x = np.linspace(self.map_manager.x_min, self.map_manager.x_max, resolution)
-        y = np.linspace(self.map_manager.y_min, self.map_manager.y_max, resolution)
-        xx, yy = np.meshgrid(x, y)
-        points = np.concatenate((np.expand_dims(xx.flatten(), axis=0), np.expand_dims(yy.flatten(), axis=0)), axis=0)
-
+    def predict_meshgrid(self, points):
         # get predictions
         zz = np.empty((points.shape[1],))
         zz[:] = np.nan
@@ -71,7 +65,7 @@ class LocalHilbertMapCollection(Composite):
         size = int(np.sqrt(zz.shape[0]))
         zz = zz.reshape(size, size)
         #zz = np.nan_to_num(zz, nan=-1.0)  # nan values are points where no predictions
-        return x, y, zz
+        return zz
 
     def is_point_in_collection(self, points: np.array):
         mask = np.zeros(points.shape[1], dtype=bool)
