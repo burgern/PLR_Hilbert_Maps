@@ -1,5 +1,2 @@
-from .paths import *
-from .config import read_config, load_config
-
-__project_path__ = read_config('config.ini', 'Setup', 'project_path')
-__dataset_path__ = read_config('config.ini', 'Setup', 'dataset_path')
+from .paths import PATH_PLR, PATH_LOG, PATH_LOG_DATA, PATH_LOG_EXP, PATH_DATA,\
+    PATH_CONFIG

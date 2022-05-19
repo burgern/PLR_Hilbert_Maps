@@ -4,14 +4,14 @@
     "loss": "BCE",
     "lr": 0.01,
     "batch_size": 32,
-    "epochs": 4
+    "epochs": 20
   },
   "global": {
     "model": "LogisticRegression",
     "loss": "BCEWithLogitsLoss",
     "lr": 0.1,
-    "batch_size": 2048,
-    "epochs": 30,
+    "batch_size": 1024,
+    "epochs": 50,
     "overlap_in_x": 1,
     "overlap_in_y": 1
   },
@@ -20,7 +20,9 @@
     "width": 2,
     "nx": 0.5,
     "ny": 0.5,
-    "center": null
+    "center": null,
+    "patch_edgecolor": "r",
+    "patch_linewidth": 1
   },
   "map_manager": {
     "x_neighbour_dist": 1,

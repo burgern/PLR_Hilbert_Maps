@@ -1,4 +1,3 @@
-from config import PATH_CONFIG_LOCAL_MODEL
 from src.utils.device_setup import device_setup
 from .local_model.mlp import MLP
 
@@ -19,16 +18,12 @@ class BaseModel(nn.Module):
     def __init__(self, model: nn.Module = MLP(), loss_fn: nn.modules.loss = nn.BCELoss(), lr: float = 1e-3,
                  batch_size: int = None, epochs: int = None):
         super().__init__()
-        # read config.ini file for default values
-        config = ConfigParser()
-        config.read(PATH_CONFIG_LOCAL_MODEL)
-
         # read inputs
         self.model = model
         self.loss_fn = loss_fn
         self.lr = lr
-        self.batch_size = batch_size if batch_size is not None else config.getint('General', 'batch_size')
-        self.epochs = epochs if epochs is not None else config.getint('General', 'epochs')
+        self.batch_size = batch_size
+        self.epochs = epochs
 
         self.device = device_setup()  # device setup (cpu or gpu)
 

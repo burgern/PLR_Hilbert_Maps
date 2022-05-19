@@ -1,26 +1,19 @@
 import os
 from pathlib import Path
+from src.utils import create_folder
 
+# get local path to PLR project
 LOCAL_PLR = Path(__file__).resolve().parent.parent
 PATH_PLR = os.path.join(Path.home(), LOCAL_PLR)
 
-# log path
+# useful paths for reference
 PATH_LOG = os.path.join(PATH_PLR, "log")
-if not os.path.exists(PATH_LOG):
-    os.makedirs(PATH_LOG)
-    print("Required models/log folder created for future model logs")
 PATH_LOG_DATA = os.path.join(PATH_LOG, "dataset")
-if not os.path.exists(PATH_LOG_DATA):
-    os.makedirs(PATH_LOG_DATA)
-    print("Required models/log folder created for future dataset logs")
-
-# data path
+PATH_LOG_EXP = os.path.join(PATH_LOG, "experiments")
 PATH_DATA = os.path.join(PATH_PLR, "dataset")
-
-# config paths
 PATH_CONFIG = os.path.join(PATH_PLR, 'config')
-PATH_CONFIG_LOCAL_MODEL = os.path.join(PATH_CONFIG, 'local_model.ini')
-PATH_CONFIG_LOCAL_HILBERT_MAP = os.path.join(PATH_CONFIG, 'local_hilbert_map.ini')
-PATH_CONFIG_CELL = os.path.join(PATH_CONFIG, 'cell.ini')
 
-GRID_MANAGER_NAME = "grid_manager.p"
+# create required folders
+req_folders = [PATH_LOG, PATH_LOG_DATA, PATH_LOG_EXP]
+for folder_path in req_folders:
+    create_folder(folder_path)

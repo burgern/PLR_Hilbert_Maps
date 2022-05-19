@@ -2,10 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Tuple
 import numpy as np
 from src.utils.data_utils import concatenate_ones
-from config import PATH_CONFIG_CELL
 import matplotlib.patches as patches
 from typing import Optional
-from configparser import ConfigParser
 import copy
 
 
@@ -16,10 +14,6 @@ class Cell(ABC):
     """
     def __init__(self, center: Optional[Tuple[float, float]], r1: Tuple[float, float], r2: Tuple[float, float],
                  nx: float, ny: float, patch_edgecolor: Optional[str] = None, patch_linewidth: Optional[float] = None):
-        # read config.ini file for default values
-        config = ConfigParser()
-        config.read(PATH_CONFIG_CELL)
-
         # read inputs
         self.center = np.array([center[0], center[1]]) if center is not None else None
         self.r1 = np.array([r1[0], r1[1]])
@@ -32,10 +26,8 @@ class Cell(ABC):
         self.r2_mag = np.linalg.norm(self.r2)
 
         # get configurations
-        self.patch_edgecolor = patch_edgecolor if patch_edgecolor is not None \
-            else config.get('Patch', 'patch_edgecolor')
-        self.patch_linewidth = patch_linewidth if patch_linewidth is not None \
-            else config.getint('Patch', 'patch_linewidth')
+        self.patch_edgecolor = patch_edgecolor
+        self.patch_linewidth = patch_linewidth
 
         if center is not None:
             self.normalization_mat, self.normalization_mat_inv = self.non_template_operations()
