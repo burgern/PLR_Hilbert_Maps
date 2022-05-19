@@ -10,7 +10,8 @@ class Circle(Cell):
     Circle
     TODO Description
     """
-    def __init__(self, center: Optional[Tuple[float, float]], radius: float, nx: float, ny: float):
+    def __init__(self, center: Optional[Tuple[float, float]], radius: float,
+                 nx: float, ny: float):
         r1 = (radius, 0)
         r2 = (0, radius)
         super().__init__(center, r1, r2, nx, ny)
@@ -25,7 +26,10 @@ class Circle(Cell):
         return mask
 
     def patch(self) -> patches:
-        patch = patches.Ellipse((self.center[0], self.center[1]), width=self.r1_mag, height=self.r2_mag, angle=0,
-                                edgecolor=self.patch_edgecolor, linewidth=self.patch_linewidth, facecolor='none')
+        patch = patches.Ellipse((self.center[0], self.center[1]),
+                                width=self.r1_mag, height=self.r2_mag, angle=0,
+                                edgecolor=self.patch_edgecolor,
+                                linewidth=self.patch_linewidth,
+                                facecolor='none')
         return patch
 
