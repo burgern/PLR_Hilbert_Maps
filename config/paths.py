@@ -9,6 +9,10 @@ PATH_LOG = os.path.join(PATH_PLR, "log")
 if not os.path.exists(PATH_LOG):
     os.makedirs(PATH_LOG)
     print("Required models/log folder created for future model logs")
+PATH_LOG_DATA = os.path.join(PATH_LOG, "dataset")
+if not os.path.exists(PATH_LOG_DATA):
+    os.makedirs(PATH_LOG_DATA)
+    print("Required models/log folder created for future dataset logs")
 
 # data path
 PATH_DATA = os.path.join(PATH_PLR, "dataset")
