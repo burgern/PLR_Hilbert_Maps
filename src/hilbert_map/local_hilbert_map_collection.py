@@ -14,13 +14,18 @@ class LocalHilbertMapCollection(Composite):
     Local Hilbert Map Collection
     TODO Description
     """
-    def __init__(self, cell_template: Cell, local_model: BaseModel, x_neighbour_dist: float,
-                 y_neighbour_dist: float, map_manager: str = 'GridMap'):
+    def __init__(self, cell_template: Cell, local_model: BaseModel,
+                 x_neighbour_dist: float, y_neighbour_dist: float,
+                 map_manager: str = 'GridMap'):
         super().__init__()
         # get params
         self.cell_template = cell_template
         self.local_model = local_model
-        self.map_manager = GridMap(cell_template, x_neighbour_dist, y_neighbour_dist) if map_manager is 'GridMap' else None
+        if map_manager is 'GridMap':
+            self.map_manager = GridMap(cell_template, x_neighbour_dist,
+                                       y_neighbour_dist)
+        else:
+            self.map_manager = None
 
         self.prev_id = -1
         self.lhm_collection = []  # store all local hilbert maps in list
@@ -34,7 +39,9 @@ class LocalHilbertMapCollection(Composite):
 
         # get required new Leafs from MapManager
         new_cells = self.map_manager.update(points_out_of_collection)
-        new_lhms = [LocalHilbertMap(cell, self.local_model.new_model(), self.prev_id + cell_idx + 1) for cell_idx, cell in enumerate(new_cells)]
+        new_lhms = [LocalHilbertMap(cell, self.local_model.new_model(),
+                                    self.prev_id + cell_idx + 1)
+                    for cell_idx, cell in enumerate(new_cells)]
         self.prev_id += len(new_cells)
 
         # add and update new Leafs to lhm collection
@@ -64,7 +71,6 @@ class LocalHilbertMapCollection(Composite):
             zz[mask] = zz_in_cell
         size = int(np.sqrt(zz.shape[0]))
         zz = zz.reshape(size, size)
-        #zz = np.nan_to_num(zz, nan=-1.0)  # nan values are points where no predictions
         return zz
 
     def is_point_in_collection(self, points: np.array):

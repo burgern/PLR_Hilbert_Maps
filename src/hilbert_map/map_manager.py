@@ -9,7 +9,8 @@ class MapManager(ABC):
     Map Manager
     TODO Description
     """
-    def __init__(self, cell_template: Cell, x_neighbour_dist: float, y_neighbour_dist: float):
+    def __init__(self, cell_template: Cell, x_neighbour_dist: float,
+                 y_neighbour_dist: float):
         # get params
         self.cell_template = cell_template
         self.x_neighbour_dist = x_neighbour_dist
@@ -40,23 +41,26 @@ class GridMap(MapManager):
     """
     Grid Map
     TODO Description
-    Inputs:
-        cell_template:              standard cell which will be added
-        x_neighbour_dist:           cell neighbour distance from center to center in x-direction
-        y_neighbour_dist:           cell neighbour distance from center to center in y-direction
+    :param cell_template standard cell which will be added
+    :param x_neighbour_dist cell neighbour dist from center to center in x-dir
+    :param y_neighbour_dist cell neighbour dist from center to center in y-dir
     """
-    def __init__(self, cell_template: Union[Cell, Rectangle], x_neighbour_dist: float, y_neighbour_dist: float):
-        super(GridMap, self).__init__(cell_template, x_neighbour_dist, y_neighbour_dist)
+    def __init__(self, cell_template: Union[Cell, Rectangle],
+                 x_neighbour_dist: float, y_neighbour_dist: float):
+        super(GridMap, self).__init__(cell_template, x_neighbour_dist,
+                                      y_neighbour_dist)
 
     def update(self, points: np.array) -> List[Cell]:
         # cells for all points
         new_cells = []
-        indices = np.concatenate((np.expand_dims(points[0, :] // self.x_neighbour_dist, axis=0),
-                                  np.expand_dims(points[1, :] // self.y_neighbour_dist, axis=0)), axis=0)
+        x_ind = np.expand_dims(points[0, :] // self.x_neighbour_dist, axis=0)
+        y_ind = np.expand_dims(points[1, :] // self.y_neighbour_dist, axis=0)
+        indices = np.concatenate((x_ind, y_ind), axis=0)
         indices = np.unique(indices, axis=1)
 
         # compare with already existing cells (keep only new cells)
-        new_indices = ~((self.map_indices[:, None] == indices[..., None]).all(0).any(1))
+        new_indices = ~((self.map_indices[:, None] ==
+                         indices[..., None]).all(0).any(1))
 
         # only proceed if there are new indices
         if new_indices.any():
@@ -68,9 +72,12 @@ class GridMap(MapManager):
                 new_cells.append(self.cell_template.new_cell((center[0] * self.x_neighbour_dist + self.x_neighbour_dist / 2,
                                                               center[1] * self.y_neighbour_dist + self.y_neighbour_dist / 2)))
 
+
             # update intervals
-            x_min, x_max = np.min(indices[0, :]) * self.x_neighbour_dist, (np.max(indices[0, :]) + 1) * self.x_neighbour_dist
-            y_min, y_max = np.min(indices[1, :]) * self.y_neighbour_dist, (np.max(indices[1, :]) + 1) * self.y_neighbour_dist
+            x_min, x_max = np.min(indices[0, :]) * self.x_neighbour_dist,\
+                           (np.max(indices[0, :]) + 1) * self.x_neighbour_dist
+            y_min, y_max = np.min(indices[1, :]) * self.y_neighbour_dist,\
+                           (np.max(indices[1, :]) + 1) * self.y_neighbour_dist
             self.update_intervals(x_min, x_max, y_min, y_max)
 
         return new_cells
