@@ -11,10 +11,12 @@ class Square(Cell):
     TODO Description
     """
     def __init__(self, center: Optional[Tuple[float, float]], width: float,
-                 nx: float, ny: float):
+                 nx: float, ny: float, patch_edgecolor: str,
+                 patch_linewidth: float):
         r1 = (width / 2, 0)
         r2 = (0, width / 2)
-        super().__init__(center, r1, r2, nx, ny)
+        super().__init__(center, r1, r2, nx, ny, patch_edgecolor,
+                         patch_linewidth)
 
     def is_point_in_cell(self, points: np.array) -> np.array:
         points_norm_abs = np.absolute(self.original_to_normalized(points))

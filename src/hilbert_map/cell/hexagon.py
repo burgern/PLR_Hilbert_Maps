@@ -11,10 +11,12 @@ class Hexagon(Cell):
     TODO Description
     """
     def __init__(self, center: Optional[Tuple[float, float]], width: float,
-                 length: float, nx: float, ny: float):
+                 length: float, nx: float, ny: float, patch_edgecolor: str,
+                 patch_linewidth: float):
         r1 = (width / 2, 0)
         r2 = (0, length / 2)
-        super().__init__(center, r1, r2, nx, ny)
+        super().__init__(center, r1, r2, nx, ny, patch_edgecolor,
+                         patch_linewidth)
 
         r1, r2 = np.expand_dims(self.r1, axis=1), np.expand_dims(self.r2, axis=1)
         self.edges = np.concatenate((r1,

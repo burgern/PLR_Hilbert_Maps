@@ -8,7 +8,8 @@ class DatasetHexagon:
     DatasetHexagon
     size [m] x size [m] area with elements
     """
-    def __init__(self, n, size, center, occlusion_zone=0.3, nx=0.5, ny=0.5):
+    def __init__(self, n, size, center, patch_edgecolor, patch_linewidth,
+                 occlusion_zone=0.3, nx=0.5, ny=0.5):
         # input parameters
         self.n = n
         self.size = size
@@ -22,58 +23,98 @@ class DatasetHexagon:
         self.reflectance = np.random.rand(self.n)  # set non-occupied to np.nan
 
         # create wall
-        wall_out = Hexagon(center=self.center, width=self.size, length=self.size, nx=self.nx, ny=self.ny)
-        wall_in = Hexagon(center=self.center, width=self.size-self.occlusion_zone, length=self.size-self.occlusion_zone,
-                          nx=self.nx, ny=self.ny)
+        wall_out = Hexagon(center=self.center, width=self.size,
+                           length=self.size, nx=self.nx, ny=self.ny,
+                           patch_edgecolor=patch_edgecolor,
+                           patch_linewidth=patch_linewidth)
+        wall_in = Hexagon(center=self.center,
+                          width=self.size-self.occlusion_zone,
+                          length=self.size-self.occlusion_zone,
+                          nx=self.nx, ny=self.ny,
+                          patch_edgecolor=patch_edgecolor,
+                          patch_linewidth=patch_linewidth)
         self.points = self.points[:, wall_out.is_point_in_cell(self.points)]
         self.occupancy = ~wall_in.is_point_in_cell(self.points)
 
         # create hexagon object
-        hex_out = Hexagon(center=self.center, width=self.size/4, length=self.size/4, nx=self.nx, ny=self.ny)
-        hex_in = Hexagon(center=self.center, width=self.size/4 - self.occlusion_zone,
-                         length=self.size/4 - self.occlusion_zone, nx=self.nx, ny=self.ny)
+        hex_out = Hexagon(center=self.center, width=self.size/4,
+                          length=self.size/4, nx=self.nx, ny=self.ny,
+                          patch_edgecolor=patch_edgecolor,
+                          patch_linewidth=patch_linewidth)
+        hex_in = Hexagon(center=self.center,
+                         width=self.size/4 - self.occlusion_zone,
+                         length=self.size/4 - self.occlusion_zone, nx=self.nx,
+                         ny=self.ny, patch_edgecolor=patch_edgecolor,
+                         patch_linewidth=patch_linewidth)
         hex_in_mask = hex_in.is_point_in_cell(self.points)
         self.points = self.points[:, ~hex_in_mask]
         self.occupancy = self.occupancy[~hex_in_mask]
         self.occupancy = self.occupancy | hex_out.is_point_in_cell(self.points)
 
         # create circle object
-        circle_out = Circle(center=(self.center[0] + self.size / 4, self.center[1]), radius=self.size / 12, nx=self.nx,
-                            ny=self.ny)
+        circle_out = Circle(center=(self.center[0] + self.size / 4,
+                                    self.center[1]), radius=self.size / 12,
+                            nx=self.nx, ny=self.ny,
+                            patch_edgecolor=patch_edgecolor,
+                            patch_linewidth=patch_linewidth)
         circle_in = Circle(center=(self.center[0] + self.size / 4, self.center[1]),
-                           radius=self.size / 12 - self.occlusion_zone / 2, nx=self.nx, ny=self.ny)
+                           radius=self.size / 12 - self.occlusion_zone / 2,
+                           nx=self.nx, ny=self.ny,
+                           patch_edgecolor=patch_edgecolor,
+                           patch_linewidth=patch_linewidth)
         circle_in_mask = circle_in.is_point_in_cell(self.points)
         self.points = self.points[:, ~circle_in_mask]
         self.occupancy = self.occupancy[~circle_in_mask]
         self.occupancy = self.occupancy | circle_out.is_point_in_cell(self.points)
 
         # create ellipsoid object
-        ell_out = Ellipsoid(center=(self.center[0], self.center[1] + self.size / 4), angle=30,
-                            radius_primary=self.size/8, radius_secondary=self.size/16, nx=self.nx, ny=self.ny)
-        ell_in = Ellipsoid(center=(self.center[0], self.center[1] + self.size / 4), angle=30,
+        ell_out = Ellipsoid(center=(self.center[0],
+                                    self.center[1] + self.size / 4), angle=30,
+                            radius_primary=self.size/8,
+                            radius_secondary=self.size/16, nx=self.nx,
+                            ny=self.ny, patch_edgecolor=patch_edgecolor,
+                            patch_linewidth=patch_linewidth)
+        ell_in = Ellipsoid(center=(self.center[0],
+                                   self.center[1] + self.size / 4), angle=30,
                            radius_primary=self.size/8 - self.occlusion_zone / 2,
-                           radius_secondary=self.size/16 - self.occlusion_zone / 2, nx=self.nx, ny=self.ny)
+                           radius_secondary=self.size/16 -
+                                            self.occlusion_zone / 2,
+                           nx=self.nx, ny=self.ny,
+                           patch_edgecolor=patch_edgecolor,
+                           patch_linewidth=patch_linewidth)
         ell_in_mask = ell_in.is_point_in_cell(self.points)
         self.points = self.points[:, ~ell_in_mask]
         self.occupancy = self.occupancy[~ell_in_mask]
         self.occupancy = self.occupancy | ell_out.is_point_in_cell(self.points)
 
         # create square object
-        squ_out = Square(center=(self.center[0] - self.size / 4, self.center[1]), width=self.size/8, nx=self.nx,
-                         ny=self.ny)
+        squ_out = Square(center=(self.center[0] - self.size / 4,
+                                 self.center[1]), width=self.size/8, nx=self.nx,
+                         ny=self.ny, patch_edgecolor=patch_edgecolor,
+                         patch_linewidth=patch_linewidth)
         squ_in = Square(center=(self.center[0] - self.size / 4, self.center[1]),
-                        width=self.size/8 - self.occlusion_zone, nx=self.nx, ny=self.ny)
+                        width=self.size/8 - self.occlusion_zone, nx=self.nx,
+                        ny=self.ny, patch_edgecolor=patch_edgecolor,
+                        patch_linewidth=patch_linewidth)
         squ_in_mask = squ_in.is_point_in_cell(self.points)
         self.points = self.points[:, ~squ_in_mask]
         self.occupancy = self.occupancy[~squ_in_mask]
         self.occupancy = self.occupancy | squ_out.is_point_in_cell(self.points)
 
         # create rectangle object
-        rec_out = Rectangle(center=(self.center[0], self.center[1] - self.size / 4), width=self.size / 4,
-                            length=self.size / 8, nx=self.nx, ny=self.ny)
-        rec_in = Rectangle(center=(self.center[0], self.center[1] - self.size / 4),
-                           width=self.size / 4 - self.occlusion_zone, length=self.size / 8 - self.occlusion_zone,
-                           nx=self.nx, ny=self.ny)
+        rec_out = Rectangle(center=(self.center[0],
+                                    self.center[1] - self.size / 4),
+                            width=self.size / 4, length=self.size / 8,
+                            nx=self.nx, ny=self.ny,
+                            patch_edgecolor=patch_edgecolor,
+                            patch_linewidth=patch_linewidth)
+        rec_in = Rectangle(center=(self.center[0],
+                                   self.center[1] - self.size / 4),
+                           width=self.size / 4 - self.occlusion_zone,
+                           length=self.size / 8 - self.occlusion_zone,
+                           nx=self.nx, ny=self.ny,
+                           patch_edgecolor=patch_edgecolor,
+                           patch_linewidth=patch_linewidth)
         rec_in_mask = rec_in.is_point_in_cell(self.points)
         self.points = self.points[:, ~rec_in_mask]
         self.occupancy = self.occupancy[~rec_in_mask]
