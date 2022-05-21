@@ -5,38 +5,51 @@ from config import PATH_LOG
 from sklearn import metrics
 import numpy as np
 import matplotlib.pyplot as plt
+from typing import Tuple
 
 
 class Component(ABC):
     """
     The base Component class declares common operations for both simple and
     complex objects of a composition.
+    In our case, LHM, LHMC, GlobalHM and HM are all components
     """
 
     @abstractmethod
-    def update(self):
+    def update(self, points: np.array, occupancy: np.array):
+        """ update component with new information
+        :param points 2d array of n points (2 x n)
+        :param occupancy 1d array with information about the points occupancy,
+        1 being occupied, 0 being free space
+        """
         raise NotImplementedError
 
     @abstractmethod
-    def predict(self):
+    def predict(self, points: np.array) -> Tuple[np.array, np.array]:
+        """ prediction of component on points
+        :param points 2d array of n points to be predicted (2 x n)
+        :return predictions, 1d array of the respective predictions
+        :return mask, 1d array of points which are used in the resp. component
+        """
         raise NotImplementedError
 
-    def evaluate(self, points: np.array, occupancy: np.array):
-        pred, gth = self.predict(points, occupancy)
+    def evaluate(self, points: np.array, occupancy: np.array) ->\
+            Tuple[np.array, np.array, np.array, np.array]:
+        """ evaluation of points
+        :param points array of n points to be evaluated (2 x n)
+        :param occupancy 1d array with information about the points occupancy,
+        1 being occupied, 0 being free space
+        :return fpr, false positive rate
+        :return tpr, true positive rate
+        :return prec, precision
+        :return recall
+        """
+        pred, mask = self.predict(points)
+        gth = occupancy[mask]
 
-        # roc
+        # extract relevant evaluation metrics
         fpr, tpr, _ = metrics.roc_curve(gth, pred)
-        roc_display = metrics.RocCurveDisplay(fpr=fpr, tpr=tpr).plot()
-
-        # pr
         prec, recall, _ = metrics.precision_recall_curve(gth, pred)
-        pr_display = metrics.PrecisionRecallDisplay(precision=prec, recall=recall).plot()
-
-        # plot
-        # fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8))
-        # roc_display.plot(ax=ax1)
-        # pr_display.plot(ax=ax2)
-        # plt.show()
 
         return fpr, tpr, prec, recall
 
@@ -51,10 +64,10 @@ class Composite(Component):
         self.x_limits = {"min": 0, "max": 0}
         self.y_limits = {"min": 0, "max": 0}
 
-    def update(self):
+    def update(self, points: np.array, occupancy: np.array):
         raise NotImplementedError
 
-    def predict(self):
+    def predict(self, points: np.array) -> Tuple[np.array, np.array]:
         raise NotImplementedError
 
     def plot(self, resolution, exp_name: Optional[str] = None, name: Optional[str] = None, show_patch: bool = True,
@@ -97,10 +110,10 @@ class Leaf(Component):
     In our case, GlobalModel and LocalHilbertMap are Leafs.
     """
 
-    def update(self):
+    def update(self, points: np.array, occupancy: np.array):
         raise NotImplementedError
 
-    def predict(self):
+    def predict(self, points: np.array) -> Tuple[np.array, np.array]:
         raise NotImplementedError
 
     def plot(self):
