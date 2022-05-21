@@ -1,6 +1,11 @@
 import os
 from pathlib import Path
-from src.utils import create_folder
+
+
+def create_folder(path: str):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 
 # get local path to PLR project
 LOCAL_PLR = Path(__file__).resolve().parent.parent
