@@ -12,7 +12,7 @@ class AverageLayer(nn.Module):
         scalar = zeros(1)
         self.bias = nn.Parameter(scalar)
 
-    def forward(self, local_map_predictions, inference=False):
+    def forward(self, local_map_predictions):
         return nanmean(local_map_predictions, dim=1).unsqueeze(-1) + 0. * self.bias
 
 

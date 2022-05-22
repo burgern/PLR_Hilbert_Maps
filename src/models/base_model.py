@@ -31,7 +31,7 @@ class BaseModel(nn.Module):
         x = torch.Tensor(points.T)
         self.model.eval()
         with torch.no_grad():
-            pred = self.model(x, inference=True)
+            pred = self.model(x)
         pred_np = pred.cpu().detach().numpy()
         return np.squeeze(pred_np)
 

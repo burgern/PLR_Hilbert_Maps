@@ -17,14 +17,11 @@ class LogisticRegression(nn.Module):
         self.weights = []
         self.weight_history = []
 
-    def forward(self, local_map_predictions, inference=False):
+    def forward(self, local_map_predictions):
         number_of_cells_in_input = local_map_predictions.shape[1]
         self.allocate_model_weights(number_of_cells_in_input)
         linear_combination = self.calculate_linear_combination(local_map_predictions)
-        if inference:
-            return sigmoid(linear_combination)
-        else:
-            return linear_combination
+        return sigmoid(linear_combination)
 
     def allocate_model_weights(self, number_of_cells_in_input):
         number_of_new_cells_to_allocate = number_of_cells_in_input - len(self.weights)
