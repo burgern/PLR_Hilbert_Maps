@@ -3,8 +3,8 @@
     "model": "MLP",
     "loss": "BCE",
     "lr": 0.01,
-    "batch_size": 32,
-    "epochs": 20
+    "batch_size": 16,
+    "epochs": 16
   },
   "global": {
     "model": "LogisticRegression",
@@ -16,13 +16,30 @@
     "overlap_in_y": 1
   },
   "cell": {
-    "type": "SQUARE",
-    "width": 2,
+    "type": "square",
+    "patch_edgecolor": "r",
+    "patch_linewidth": 1,
     "nx": 0.5,
     "ny": 0.5,
-    "center": null,
-    "patch_edgecolor": "r",
-    "patch_linewidth": 1
+    "square": {
+      "width": 2
+    },
+    "rectangle": {
+      "width": 2,
+      "length": 2
+    },
+    "circle": {
+      "radius": 1
+    },
+    "ellipsoid": {
+      "angle": 45,
+      "radius_primary": 2,
+      "radius_secondary": 1
+    },
+    "hexagon": {
+      "width": 1,
+      "length": 1
+    }
   },
   "map_manager": {
     "x_neighbour_dist": 1,
