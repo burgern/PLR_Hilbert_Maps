@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Optional
-import os
-from config import PATH_LOG
 from sklearn import metrics
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import Tuple
+from matplotlib.axes import Axes
+from matplotlib.contour import ContourSet
+
+from src.utils.math_utils import meshgrid_points
 
 
 class Component(ABC):
@@ -64,43 +65,84 @@ class Composite(Component):
         self.x_limits = {"min": 0, "max": 0}
         self.y_limits = {"min": 0, "max": 0}
 
+    @abstractmethod
     def update(self, points: np.array, occupancy: np.array):
         raise NotImplementedError
 
+    @abstractmethod
+    def get_lhm_collection(self):
+        raise NotImplementedError
+
+    @abstractmethod
     def predict(self, points: np.array) -> Tuple[np.array, np.array]:
         raise NotImplementedError
 
-    def plot(self, resolution, exp_name: Optional[str] = None, name: Optional[str] = None, show_patch: bool = True,
-             show_id: bool = True):
-        # get grid points
-        x = np.linspace(self.x_limits["min"], self.x_limits["max"], resolution)
-        y = np.linspace(self.y_limits["min"], self.y_limits["max"], resolution)
-        xx, yy = np.meshgrid(x, y)
-        points = np.concatenate((np.expand_dims(xx.flatten(), axis=0), np.expand_dims(yy.flatten(), axis=0)), axis=0)
-        zz = self.predict_meshgrid(points)
+    def predict_lhm(self, points: np.array) -> Tuple[np.array, np.array]:
+        """ predictions of all lhm's on points
+        :param points 2d array of n points to be predicted (2 x n)
+        :return predictions, (#lhm's, n) array of the respective predictions
+        :return mask, 1d array info if resp. point predicted by at least one lhm
+        """
+        pred = np.empty((len(self.get_lhm_collection()), points.shape[1]))
+        pred[:, :] = np.nan
+        for lhm_idx, lhm in enumerate(self.get_lhm_collection()):
+            pred_lhm, mask = lhm.predict(points)
+            pred[lhm_idx, mask] = pred_lhm
+        mask = ~np.all(np.isnan(pred), axis=0)
+        return pred[:, mask], mask
 
+    def predict_weighted(self, points: np.array, weights: np.array) -> \
+            Tuple[np.array, np.array]:
+        """ weighted prediction of lhm collection on points
+        :param points 2d array of n points to be predicted (2 x n)
+        :param weights 1d array (size is #lhm's)
+        :return predictions, 1d array of the respective predictions
+        :return mask, 1d array of points which are used in the resp. component
+        """
+        pred, mask = self.predict_lhm(points)
+        pred_weighted = []
+        pred_mask = ~np.isnan(pred)
+        for col_idx, (col_pred, col_mask) in enumerate(zip(pred.T,
+                                                           pred_mask.T)):
+            if not np.isnan(mask[col_idx]):
+                pred_weighted.append(np.dot(col_pred[col_mask],
+                                            weights[col_mask]) /
+                                     np.sum(weights[col_mask]))
+        return np.array(pred_weighted), mask
 
-        # # plot
-        plt.close('all')
-        fig, ax = plt.subplots(figsize=(10, 5))
+    def plot(self, ax: Axes, resolution: int = 10, show_patch: bool = True,
+             show_id: bool = False) -> ContourSet:
+        """ plot composite onto axes of a matplotlib figure
+        :param ax is the matplotlib axes to be plotted onto
+        :param resolution of predicted points per unit length for plotting
+        :param show_patch shows the cells shape in the plot
+        :param show_id shows the resp. id of each cell
+        :return mapping -> colormap to be added to the figure separately
+        """
+        points, x, y = meshgrid_points(x_start=self.x_limits["min"],
+                                       x_end=self.x_limits["max"],
+                                       y_start=self.y_limits["min"],
+                                       y_end=self.y_limits["max"],
+                                       resolution=resolution)
+
+        # compute weighted predictions of relevant points
+        pred, mask = self.predict(points=points)
+        pred_all = np.empty(points.shape[1])
+        pred_all[:] = np.nan
+        pred_all[mask] = pred
+
+        # plot onto axes
+        mapping = ax.contourf(x, y, pred_all.reshape(len(y), len(x)),
+                              levels=10, cmap='binary')
         ax.set_facecolor('lightcoral')
-        mapping = ax.contourf(x, y, zz, levels=10, cmap='binary')
-        fig.colorbar(mapping)
+        plt.axis('scaled')
         for lhm in self.get_lhm_collection():
             if show_patch:
                 ax.add_patch(lhm.cell.patch())  # add patches
             if show_id:
-                ax.text(lhm.cell.center[0], lhm.cell.center[1], str(lhm.id), color="blue", fontsize=12)
-        plt.axis('scaled')
-        if exp_name is not None:
-            path_exp = os.path.join(PATH_LOG, exp_name)
-            if not os.path.exists(path_exp):
-                os.makedirs(path_exp)
-                print("created new experiment log folder")
-            path = os.path.join(path_exp, name)
-            plt.savefig(path)
-        else:
-            plt.show()
+                ax.text(lhm.cell.center[0], lhm.cell.center[1], str(lhm.id),
+                        color="orange", fontsize=12)
+        return mapping
 
 
 class Leaf(Component):
@@ -116,5 +158,5 @@ class Leaf(Component):
     def predict(self, points: np.array) -> Tuple[np.array, np.array]:
         raise NotImplementedError
 
-    def plot(self):
+    def plot(self, ax: Axes, res: int = 100):
         raise NotImplementedError

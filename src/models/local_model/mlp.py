@@ -11,6 +11,10 @@ class MLP(nn.Module):
             nn.Tanhshrink(),
             nn.Linear(8, 8, bias=True),
             nn.Tanhshrink(),
+            nn.Linear(8, 8, bias=True),
+            nn.Tanhshrink(),
+            nn.Linear(8, 8, bias=True),
+            nn.Tanhshrink(),
             nn.Linear(8, 1, bias=True),
             nn.Sigmoid()
         )
