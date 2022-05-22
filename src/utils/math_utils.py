@@ -1,6 +1,9 @@
 import math
 from numpy import arange, array, transpose, sum, round, arctan2, sqrt, cos, sin, empty, concatenate, zeros, vstack
 from numpy.random import uniform
+import numpy as np
+from typing import Tuple
+
 
 def deg_to_rad(angle_deg):
     return angle_deg / 180 * math.pi
@@ -43,3 +46,22 @@ def point_cloud_WRT_World(pose, point_cloud):
     point_cloud[0] += pose[0]
     point_cloud[1] += pose[1]
     return point_cloud
+
+
+def meshgrid_points(x_start: float, x_end: float, y_start: float, y_end: float,
+                    resolution: int) -> Tuple[np.array, np.array, np.array]:
+    """ get points of a meshgrid
+    :param x_start x starting coordinate
+    :param x_end x ending coordinate
+    :param y_start y starting coordinate
+    :param y_end y ending coordinate
+    :param resolution point density resolution in coordinate axis per unit ()
+    :return points of a generated meshgrid
+    :return x linspaced coordinates in x direction
+    :return y linspaced coordinates in y direction
+    """
+    x = np.linspace(x_start, x_end, int((x_end - x_start) * resolution) + 1)
+    y = np.linspace(y_start, y_end, int((y_end - y_start) * resolution) + 1)
+    xx, yy = np.meshgrid(x, y)
+    points = np.vstack((xx.flatten(), yy.flatten()))
+    return points, x, y
