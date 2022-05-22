@@ -19,6 +19,7 @@ class MapManager(ABC):
         self.map_indices = np.empty((2, 0))
         self.x_min, self.x_max = 0, 0
         self.y_min, self.y_max = 0, 0
+        self.first_iteration = True
 
     @abstractmethod
     def update(self, points: np.array) -> List[Cell]:
@@ -26,15 +27,19 @@ class MapManager(ABC):
         raise NotImplementedError
 
     def update_intervals(self, x_min, x_max, y_min, y_max):
-        # TODO if x_min and y_min are more than 0, 0 we currently plot too much
-        if x_min < self.x_min:
-            self.x_min = x_min
-        if x_max > self.x_max:
-            self.x_max = x_max
-        if y_min < self.y_min:
-            self.y_min = y_min
-        if y_max > self.y_max:
-            self.y_max = y_max
+        if self.first_iteration:
+            self.x_min, self.x_max = x_min, x_max
+            self.y_min, self.y_max = y_min, y_max
+            self.first_iteration = False
+        else:
+            if x_min < self.x_min:
+                self.x_min = x_min
+            if x_max > self.x_max:
+                self.x_max = x_max
+            if y_min < self.y_min:
+                self.y_min = y_min
+            if y_max > self.y_max:
+                self.y_max = y_max
 
 
 class GridMap(MapManager):
@@ -68,10 +73,13 @@ class GridMap(MapManager):
             self.map_indices = np.hstack((self.map_indices, indices))
 
             # new cells
-            for center in indices.T:
-                new_cells.append(self.cell_template.new_cell((center[0] * self.x_neighbour_dist + self.x_neighbour_dist / 2,
-                                                              center[1] * self.y_neighbour_dist + self.y_neighbour_dist / 2)))
-
+            for index in indices.T:
+                center_x = index[0] * self.x_neighbour_dist + \
+                           self.x_neighbour_dist / 2
+                center_y = index[1] * self.y_neighbour_dist + \
+                           self.y_neighbour_dist / 2
+                new_cells.append(self.cell_template.new_cell((center_x,
+                                                              center_y)))
 
             # update intervals
             x_min, x_max = np.min(indices[0, :]) * self.x_neighbour_dist,\
