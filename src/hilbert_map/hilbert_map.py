@@ -21,29 +21,6 @@ class HilbertMap(Composite):
         with open(config_path) as f:
             config = json.load(f)
 
-        if config["local"]["model"] == "MLP":
-            local_model = MLP()
-        else:
-            # TODO hadzica: Add other cases.
-            raise NotImplementedError
-
-        if config["local"]["loss"] == "BCE":
-            local_loss = nn.BCELoss()
-        else:
-            # TODO hadzica: Add other cases.
-            raise NotImplementedError
-
-        if config["cell"]["type"] == "SQUARE":
-            nx = config["cell"]["nx"]
-            ny = config["cell"]["ny"]
-            width = config["cell"]["width"]
-            if "None" in config["cell"]["center"]:
-                center = None
-            cell = Square(center=center, width=width, nx=nx, ny=ny)
-        else:
-            # TODO hadzica: Add other cases.
-            raise NotImplementedError
-
         if config["global"]["loss"] == "BCE":
             global_loss = nn.BCELoss()
         elif config["global"]["loss"] == "BCEWithLogitsLoss":
@@ -66,21 +43,14 @@ class HilbertMap(Composite):
         x_neighbour_dist = config["global"]["overlap_in_x"]
         y_neighbour_dist = config["global"]["overlap_in_y"]
 
-        local_lr = config["local"]["lr"]
-        local_bs = config["local"]["batch_size"]
-        local_epochs = config["local"]["epochs"]
-
-        local_map = BaseModel(local_model, local_loss, lr=local_lr, batch_size=local_bs, epochs=local_epochs)
-        self.local_map_collection = LocalHilbertMapCollection(cell, local_map, x_neighbour_dist=x_neighbour_dist,
+        self.local_map_collection = LocalHilbertMapCollection(config, x_neighbour_dist=x_neighbour_dist,
                                                               y_neighbour_dist=y_neighbour_dist)
 
     def update(self, points: np.array, occupancy: np.array):
         self.local_map_collection.update(points, occupancy)
         with no_grad():
-            local_map_outputs = self.local_map_collection.predict(points)
-        #np.save("local_map_predictions", local_map_outputs)
-        #np.save("local_map_points", points)
-        #np.save("local_map_groundtruth", occupancy)
+            local_map_outputs, local_map_output_masks = self.local_map_collection.predict_lhm(points)
+
         self.global_map.train(local_map_outputs, occupancy, print_loss=True)
 
         self.x_limits["min"] = self.local_map_collection.map_manager.x_min
@@ -89,9 +59,9 @@ class HilbertMap(Composite):
         self.y_limits["max"] = self.local_map_collection.map_manager.y_max
 
     def predict(self, points: np.array):
-        local_map_outputs = self.local_map_collection.predict(points)
+        local_map_outputs, local_map_output_masks = self.local_map_collection.predict_lhm(points)
         predictions = self.global_map.predict(local_map_outputs)
-        return predictions
+        return predictions, local_map_output_masks
 
     def predict_meshgrid(self, points: np.array):
         zz = self.predict(points)
