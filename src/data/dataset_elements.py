@@ -9,7 +9,7 @@ class DatasetHexagon:
     size [m] x size [m] area with elements
     """
     def __init__(self, n, size, center, patch_edgecolor, patch_linewidth,
-                 occlusion_zone=0.3, nx=0.5, ny=0.5):
+                 occlusion_zone=0.3, nx=0.5, ny=0.5, updates=20):
         # input parameters
         self.n = n
         self.size = size
@@ -17,6 +17,10 @@ class DatasetHexagon:
         self.occlusion_zone = occlusion_zone
         self.nx = nx
         self.ny = ny
+        self.updates = updates
+
+        # update steps counter
+        self.curr_update = -1
 
         # initialize points
         self.points = np.random.uniform(-self.size/2, self.size/2, (2, self.n)) + np.array([[center[0]], [center[1]]])
@@ -120,8 +124,16 @@ class DatasetHexagon:
         self.occupancy = self.occupancy[~rec_in_mask]
         self.occupancy = self.occupancy | rec_out.is_point_in_cell(self.points)
 
-    def next(self):
-        self.__init__(self.n, self.size, self.center, self.occlusion_zone, self.nx, self.ny)
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        curr_update = self.curr_update + 1
+        self.__init__(self.n, self.size, self.center, self.occlusion_zone,
+                      self.nx, self.ny, self.updates)
+        self.curr_update = curr_update
+        if curr_update >= self.updates:
+            raise StopIteration
         return self.points, self.occupancy, self.reflectance
 
     def plot(self):
