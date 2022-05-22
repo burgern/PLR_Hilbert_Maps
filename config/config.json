@@ -8,7 +8,7 @@
   },
   "global": {
     "model": "LogisticRegression",
-    "loss": "BCEWithLogitsLoss",
+    "loss": "BCE",
     "lr": 0.1,
     "batch_size": 1024,
     "epochs": 50,
@@ -21,6 +21,7 @@
     "patch_linewidth": 1,
     "nx": 0.5,
     "ny": 0.5,
+    "center": "None",
     "square": {
       "width": 2
     },
