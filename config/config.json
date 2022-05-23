@@ -2,6 +2,7 @@
   "local": {
     "model": "MLP",
     "loss": "BCE",
+    "config_path": "../config/local_mlp_config.json",
     "lr": 0.01,
     "batch_size": 16,
     "epochs": 16

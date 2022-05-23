@@ -1,6 +1,5 @@
 from src.utils.device_setup import device_setup
 from .local_model.mlp import MLP
-
 from configparser import ConfigParser
 import numpy as np
 import torch
@@ -15,7 +14,7 @@ class BaseModel(nn.Module):
     Local Model
     TODO Description
     """
-    def __init__(self, model: nn.Module = MLP(), loss_fn: nn.modules.loss = nn.BCELoss(), lr: float = 1e-3,
+    def __init__(self, model: nn.Module, loss_fn: nn.modules.loss = nn.BCELoss(), lr: float = 1e-3,
                  batch_size: int = None, epochs: int = None):
         super().__init__()
         # read inputs

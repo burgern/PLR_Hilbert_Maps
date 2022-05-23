@@ -1,0 +1,9 @@
+{
+  "n_inputs": 2,
+  "n_outputs": 1,
+  "n_hidden_layers": 3,
+  "w_hidden_layers": 8,
+  "activation_hidden_layers": "Tanhshrink",
+  "activation_input_layer": "Tanhshrink",
+  "activation_output_layer": "Sigmoid"
+}

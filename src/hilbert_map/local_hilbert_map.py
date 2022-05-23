@@ -13,6 +13,7 @@ from src.models.base_model import BaseModel
 from src.utils.math_utils import meshgrid_points
 from src.models import MLP
 from torch import nn
+import json
 
 
 class LocalHilbertMap(Leaf):
@@ -132,7 +133,10 @@ class LocalHilbertMap(Leaf):
 
         # load local model from config
         config_local = self.config["local"]
-        model = MLP() if config_local["model"] == "MLP" else None
+        model_local_config_path = config_local["config_path"]
+        with open(model_local_config_path) as f:
+            model_local_config = json.load(f)
+        model = MLP(model_local_config) if config_local["model"] == "MLP" else None
         loss = nn.BCELoss() if config_local["loss"] == "BCE" else None
         local_model = BaseModel(model, loss, lr=config_local["lr"],
                                 batch_size=config_local["batch_size"],
