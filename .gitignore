@@ -5,3 +5,4 @@ musi
 autoencoder
 .DS_Store
 *__pycache__*
+latest_model.pkl
