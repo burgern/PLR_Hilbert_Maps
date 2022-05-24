@@ -23,7 +23,7 @@ class LocalHilbertMap(Leaf):
     Local Hilbert Map
     TODO Description
     """
-    def __init__(self, config: Union[Dict, Tuple[Cell, BaseModel]],
+    def __init__(self, config: Union[Dict, Tuple[Cell, BaseModel, int]],
                  center: Optional[Tuple[float, float]] = None,
                  id: Optional[int] = None):
         self.config = config
@@ -34,12 +34,19 @@ class LocalHilbertMap(Leaf):
         else:
             self.cell, self.local_model = config[0], config[1]
             self.center = self.cell.center
+        self.point_buffer = None
+        self.occupancy_buffer = None
+        if type(config) == dict:
+            self.max_data_buffer_length = config["local"]["max_data_buffer_length"]
+        else:
+            self.max_data_buffer_length = config[2]
 
     def update(self, points: np.array, occupancy: np.array):
         points, mask = self.mask_points(points)
         occupancy = occupancy[mask]
         points = self.cell.original_to_normalized(points)
-        self.local_model.train(points, occupancy)
+        self.do_buffer_management(points, occupancy)
+        self.local_model.train(self.point_buffer, self.occupancy_buffer)
 
     def predict(self, points: np.array) -> Tuple[np.array, np.array]:
         points, mask = self.mask_points(points)
@@ -145,3 +152,19 @@ class LocalHilbertMap(Leaf):
                                 epochs=config_local["epochs"])
 
         return cell, local_model
+
+    def do_buffer_management(self, points: np.array, occupancy: np.array):
+        if (self.point_buffer is None) and (self.occupancy_buffer is None):
+            self.point_buffer = points
+            self.occupancy_buffer = occupancy
+        else:
+            self.point_buffer = np.concatenate((self.point_buffer, points), axis=1)
+            self.occupancy_buffer = np.concatenate((self.occupancy_buffer, occupancy))
+
+            assert self.point_buffer.shape[1] == self.occupancy_buffer.shape[0]
+
+            buffer_overflow = self.point_buffer.shape[1] - self.max_data_buffer_length
+
+            if buffer_overflow > 0:
+                self.point_buffer = self.point_buffer[:, buffer_overflow:]
+                self.occupancy_buffer = self.occupancy_buffer[buffer_overflow:]

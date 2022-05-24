@@ -11,10 +11,11 @@
   "local": {
     "model": "MLP",
     "loss": "BCE",
-    "config_path": "../config/local_mlp_config.json",
+    "config_path": "config/local_mlp_config.json",
     "lr": 0.01,
     "batch_size": 16,
-    "epochs": 16
+    "epochs": 16,
+    "max_data_buffer_length": 1000
   },
   "global": {
     "model": "LogisticRegression",
