@@ -12,6 +12,7 @@ class CommandLineHandler:
     def add_args(self):
         self.parser.add_argument("--load_model", action="store_true")
         self.parser.add_argument("--exp_name", type=str, default="")
+        self.parser.add_argument("--gen_video", action="store_true")
 
     def parse(self):
         return self.parser.parse_args()

@@ -7,12 +7,15 @@ import json
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from math import cos, sin
 
 from config import PATH_LOG
 from src.hilbert_map import LocalHilbertMap, LocalHilbertMapCollection
 from src.utils.plot_utils import plot_meshgrid
 from utils.plot_utils import plot_pr, plot_roc
 from utils.model_setup_utils import generate_data
+from src.utils.evaluation_utils import create_video_stream, create_gif_from_mp4
+from argparse import ArgumentParser
 
 EVAL_FILES = ("pred.npy", "gth.npy")
 PLOT_FILES = ("x_meshgrid.npy", "y_meshgrid.npy", "zz_meshgrid.npy")
@@ -35,11 +38,71 @@ class Evaluator:
         self.update_dirs.sort()
         self.nr_updates = int(self.update_dirs[-1][-5:].lstrip('0'))
 
-    def evaluate_model(self):
+    def create_update_video_stream_for_component(self, fps: int = 3) -> \
+            Tuple[str, str]:
+        fig, ((ax_roc, ax_pr, ax_data_curr),
+              (ax_data, ax_data_cumul, ax_plot)) = \
+            plt.subplots(nrows=2, ncols=3, figsize=(12, 12))
+        generated_images_path = join(self.exp_path, "generated_images")
+        if not os.path.exists(generated_images_path):
+            os.makedirs(generated_images_path)
+
+        # ax_data (stays static)
+        config = self.load_config()
+        dataset = generate_data(config=config)
+        dataset.visualize(ax=ax_data, step_size=1)
+        ax_data.axis('equal')
+
+        for update in range(1, self.nr_updates+1):
+            # ax_data_cumul
+            data = self.load_data(update=update)
+            ax_data_cumul.scatter(data[0, :], data[1, :], c=data[2, :],
+                                  cmap="cool", s=1)
+            ax_data_cumul.axis('equal')
+
+            # ax_plot
+            ax_plot.clear()
+            x, y, zz = self.load_lhmc_plot(update=update)
+            mapping = plot_meshgrid(ax=ax_plot, x=x, y=y, zz=zz)
+            cb = fig.colorbar(mapping)
+            pose = dataset[update-1]["pose"]
+            position = pose["position"]
+            angle = pose["angle"]
+            size = 2
+            dir_vect = np.array([cos((angle)), sin((angle))]) * \
+                       size
+            ax_plot.quiver(position[0], position[1], dir_vect[0], dir_vect[1])
+            ax_plot.axis('equal')
+
+            # evaluations: ax_roc and ax_pr
+            ax_roc.clear()
+            ax_pr.clear()
+            pred, gth = self.load_lhmc_eval(update=update)
+            plot_roc(ax=ax_roc, pred=pred, gth=gth)
+            plot_pr(ax=ax_pr, pred=pred, gth=gth)
+
+            fig.savefig(join(generated_images_path, f"update_{update:05}.png"))
+
+            ax_data_cumul.scatter(data[0, :], data[1, :], c=data[2, :],
+                                  cmap="viridis", s=1)
+            ax_data_cumul.axis('equal')
+            cb.remove()
+
+        # generate video in .mp4 and .gif format
+        mp4_path = create_video_stream(image_folder=generated_images_path,
+                                       fps=fps)
+        print(f"[EVALUATOR] generated mp4: {mp4_path}")
+        gif_path = create_gif_from_mp4(mp4_path)
+        print(f"[EVALUATOR] generated gif: {gif_path}")
+        return mp4_path, gif_path
+
+    def evaluate_model(self, model: Optional[Union[LocalHilbertMap,
+                                                   LocalHilbertMapCollection]]
+            = None):
         fig, ((ax_roc, ax_pr), (ax_data, ax_plot)) = \
             plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
 
-        model = self.load_model()
+        model = self.load_model() if model is None else model
         config = self.load_config()
 
         # evaluations: ax_roc and ax_pr
@@ -152,5 +215,11 @@ class Evaluator:
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--gen_video", action="store_true")
+    args = parser.parse_args()
+
     evaluator = Evaluator()
     evaluator.evaluate_model()
+    if args.gen_video:
+        evaluator.create_update_video_stream_for_component()
