@@ -1,4 +1,13 @@
 {
+  "model": {
+    "model": "lhmc",
+    "lhm": {
+      "center_x": 0,
+      "center_y": 0
+    },
+    "lhmc": {},
+    "hm": {}
+  },
   "local": {
     "model": "MLP",
     "loss": "BCE",
@@ -22,7 +31,7 @@
     "nx": 0.5,
     "ny": 0.5,
     "square": {
-      "width": 2
+      "width": 5
     },
     "rectangle": {
       "width": 2,
@@ -46,12 +55,31 @@
     "y_neighbour_dist": 1
   },
   "dataset": {
+    "dataset": "intel_lab",
     "dummy": {
-      "updates": 200,
+      "updates": 1,
       "points": 10000,
       "size": 5,
       "center_x": 0,
       "center_y": 0
+    },
+    "intel_lab": {
+      "shuffle_seed": null,
+      "skip_vp": 1,
+      "tot_viewpoints": 30,
+      "invalid_scan_dist": 20
+    },
+    "freiburg_079": {
+      "shuffle_seed": 42,
+      "skip_vp": 1,
+      "tot_viewpoints": null,
+      "invalid_scan_dist": 10
+    },
+    "freiburg_campus": {
+      "shuffle_seed": 42,
+      "skip_vp": 1,
+      "tot_viewpoints": null,
+      "invalid_scan_dist": 70
     }
   }
 }
