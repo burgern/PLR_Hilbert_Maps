@@ -33,7 +33,7 @@ class BaseModel(nn.Module):
         with torch.no_grad():
             pred = self.model(x, inference=True)
         pred_np = pred.cpu().detach().numpy()
-        return np.squeeze(pred_np)
+        return np.squeeze(pred_np, axis=1)
 
     def evaluate(self):
         raise NotImplementedError
