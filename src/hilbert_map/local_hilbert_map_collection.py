@@ -14,9 +14,7 @@ class LocalHilbertMapCollection(Composite):
     Local Hilbert Map Collection
     TODO Description
     """
-    def __init__(self, config: Dict, x_neighbour_dist: float,
-                 y_neighbour_dist: float,
-                 map_manager: str = 'GridMap'):
+    def __init__(self, config: Dict, map_manager: str = 'GridMap'):
         super().__init__()
         # get params
         self.config = config
@@ -24,8 +22,11 @@ class LocalHilbertMapCollection(Composite):
 
         # choose map_manager
         if map_manager is 'GridMap':
-            self.map_manager = GridMap(self.cell_template, x_neighbour_dist,
-                                       y_neighbour_dist)
+            x_neighbour_dist = self.config["map_manager"]["x_neighbour_dist"]
+            y_neighbour_dist = self.config["map_manager"]["y_neighbour_dist"]
+            self.map_manager = GridMap(cell_template=self.cell_template,
+                                       x_neighbour_dist=x_neighbour_dist,
+                                       y_neighbour_dist=y_neighbour_dist)
         else:
             self.map_manager = None
 
@@ -63,18 +64,6 @@ class LocalHilbertMapCollection(Composite):
     def predict(self, points: np.array) -> Tuple[np.array, np.array]:
         weights = np.ones(len(self.lhm_collection), dtype=np.float)
         return self.predict_weighted(points, weights)
-
-    def predict_meshgrid(self, points):
-        zz = np.empty((points.shape[1],))
-        zz[:] = np.nan
-        for lhm in self.lhm_collection:
-            mask = lhm.cell.is_point_in_cell(points)
-            points_in_cell = points[:, mask]
-            zz_in_cell = np.squeeze(lhm.predict(points_in_cell))
-            zz[mask] = zz_in_cell
-        size = int(np.sqrt(zz.shape[0]))
-        zz = zz.reshape(size, size)
-        return zz
 
     def is_point_in_collection(self, points: np.array):
         mask = np.zeros(points.shape[1], dtype=bool)
