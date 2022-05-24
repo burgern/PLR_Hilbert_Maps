@@ -28,18 +28,20 @@ class MapManager(ABC):
 
     def update_intervals(self, x_min, x_max, y_min, y_max):
         if self.first_iteration:
-            self.x_min, self.x_max = x_min, x_max
-            self.y_min, self.y_max = y_min, y_max
+            self.x_min = x_min - self.cell_template.r1_mag
+            self.x_max = x_max + self.cell_template.r1_mag
+            self.y_min = y_min - self.cell_template.r2_mag
+            self.y_max = y_max + self.cell_template.r2_mag
             self.first_iteration = False
         else:
             if x_min < self.x_min:
-                self.x_min = x_min
+                self.x_min = x_min - self.cell_template.r1_mag
             if x_max > self.x_max:
-                self.x_max = x_max
+                self.x_max = x_max + self.cell_template.r1_mag
             if y_min < self.y_min:
-                self.y_min = y_min
+                self.y_min = y_min - self.cell_template.r2_mag
             if y_max > self.y_max:
-                self.y_max = y_max
+                self.y_max = y_max + self.cell_template.r2_mag
 
 
 class GridMap(MapManager):
