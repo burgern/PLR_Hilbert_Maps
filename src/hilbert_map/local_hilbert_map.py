@@ -83,8 +83,8 @@ class LocalHilbertMap(Leaf):
             return None
         else:
             # plot onto axes
-            mapping = ax.contourf(x, y, pred_all.reshape(len(y), len(x)), levels=10,
-                                  cmap='binary')
+            mapping = ax.contourf(x, y, pred_all.reshape(len(y), len(x)),
+                                  levels=10, cmap='binary')
             return mapping
 
     def save(self, path: str):
