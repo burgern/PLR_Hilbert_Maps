@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from math import sqrt
 import pickle
 import numpy as np
+from os.path import join
 
 from .composite_design import Leaf
 from src.hilbert_map.cell import Cell, Square, Rectangle, Circle, Ellipsoid,\
@@ -14,6 +15,7 @@ from src.utils.math_utils import meshgrid_points
 from src.models import MLP
 from torch import nn
 import json
+from config import PATH_PLR
 
 
 class LocalHilbertMap(Leaf):
@@ -133,7 +135,7 @@ class LocalHilbertMap(Leaf):
 
         # load local model from config
         config_local = self.config["local"]
-        model_local_config_path = config_local["config_path"]
+        model_local_config_path = join(PATH_PLR, config_local["config_path"])
         with open(model_local_config_path) as f:
             model_local_config = json.load(f)
         model = MLP(model_local_config) if config_local["model"] == "MLP" else None

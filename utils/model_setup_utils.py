@@ -6,7 +6,7 @@ from src.hilbert_map.local_hilbert_map_collection import \
     LocalHilbertMapCollection
 from src.data import DatasetHexagon, DataIntelLab, DataFreiburg079,\
     DataFreiburgCampus
-from evaluation import Logger
+from evaluation.logger import Logger
 
 
 def generate_data(config: Dict):
