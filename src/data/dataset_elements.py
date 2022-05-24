@@ -1,6 +1,15 @@
 from src.hilbert_map import Square, Rectangle, Circle, Ellipsoid, Hexagon
 import numpy as np
 import matplotlib.pyplot as plt
+from typing import Optional, Dict, Tuple
+
+
+def load_from_config(config: Dict):
+    n = config["points"]
+    size = config["size"]
+    center = (config["center_x"], config["center_y"])
+    updates = config["updates"]
+    return n, size, center, updates
 
 
 class DatasetHexagon:
@@ -8,9 +17,16 @@ class DatasetHexagon:
     DatasetHexagon
     size [m] x size [m] area with elements
     """
-    def __init__(self, n, size, center, patch_edgecolor, patch_linewidth,
+    def __init__(self, config: Optional[Dict], n: int = 10000, size: int = 5,
+                 center: Tuple[float, float] = (0, 0),
+                 patch_edgecolor: str = "r", patch_linewidth: int = 1,
                  occlusion_zone=0.3, nx=0.5, ny=0.5, updates=20):
         # input parameters
+        if config is not None:
+            config_dummy = config["dataset"]["dummy"]
+            n, size, center, updates = \
+                load_from_config(config_dummy)
+        self.config = config
         self.n = n
         self.size = size
         self.center = center
@@ -129,8 +145,9 @@ class DatasetHexagon:
 
     def __next__(self):
         curr_update = self.curr_update + 1
-        self.__init__(self.n, self.size, self.center, self.occlusion_zone,
-                      self.nx, self.ny, self.updates)
+        self.__init__(config=self.config, n=self.n, size=self.size,
+                      center=self.center, occlusion_zone=self.occlusion_zone,
+                      nx=self.nx, ny=self.ny, updates=self.updates)
         self.curr_update = curr_update
         if curr_update >= self.updates:
             raise StopIteration
