@@ -3,6 +3,7 @@ from typing import List, Tuple, Optional
 import numpy as np
 import math
 from matplotlib.axes import Axes
+import matplotlib.pyplot as plt
 from src.utils.evaluation_utils import timeit
 import time
 
@@ -44,6 +45,14 @@ class Dataset:
         self.generate_data()  # generate occupancy and free spaces from scan
         self.preprocess_data()  # preprocessing step on generated data
         self.evaluate_data()  # evaluate generated and preprocessed data
+
+    def data_concatenated(self):
+        points = np.empty((2, 0))
+        occupancy = np.empty(0)
+        for vp in self.data:
+            points = np.hstack((points, vp["points"]))
+            occupancy = np.concatenate((occupancy, vp["occupancy"]))
+        return points, occupancy
 
     def preprocess_data(self):
         """ preprocess loaded data
@@ -121,17 +130,25 @@ class Dataset:
 
         return points_free, occupancy
 
-    def visualize_viewpoint(self, ax: Axes, index: int):
-        ax.scatter(self[index]["points"][0, :], self[index]["points"][1, :],
-                   c=self[index]["occupancy"], cmap="coolwarm", s=1)
-        ax.scatter(self[index]["pose"]["position"][0],
-                   self[index]["pose"]["position"][1], s=4, c="green")
+    def visualize_viewpoint(self, index: int, ax: Optional[Axes] = None):
+        if ax is None:
+            plt.scatter(self[index]["points"][0, :], self[index]["points"][1, :],
+                       c=self[index]["occupancy"], cmap="coolwarm", s=1)
+            plt.scatter(self[index]["pose"]["position"][0],
+                       self[index]["pose"]["position"][1], s=4, c="green")
+            plt.show()
+        else:
+            ax.scatter(self[index]["points"][0, :], self[index]["points"][1, :],
+                       c=self[index]["occupancy"], cmap="coolwarm", s=1)
+            ax.scatter(self[index]["pose"]["position"][0],
+                       self[index]["pose"]["position"][1], s=4, c="green")
 
     def visualize(self, ax: Axes, step_size: Optional[int] = 1):
         for i in np.arange(0, len(self.data), step_size):
             self.visualize_viewpoint(ax=ax, index=i)
 
     def evaluate_data(self):
+        # TODO not correct evaluation when using flags for preprocessing data
         self.total_points = self.nr_occ_points + self.nr_free_points
         nr_viewpoints = len(self.data)
         occ_points = self.nr_occ_points
@@ -163,8 +180,10 @@ class Dataset:
     def __iter__(self):
         return self
 
-    def __next__(self) -> List[Tuple]:
+    def __next__(self) -> Tuple[np.array, np.array, None]:
         if self.current_viewpoint >= len(self.data):
             self.current_viewpoint = 0
             raise StopIteration
-        return self.data[self.current_viewpoint]
+        data = self.data[self.current_viewpoint]
+        self.current_viewpoint += 1
+        return data["points"], data["occupancy"], None
