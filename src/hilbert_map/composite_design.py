@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from sklearn import metrics
 import numpy as np
-import matplotlib.pyplot as plt
 from typing import Tuple
 from matplotlib.axes import Axes
 from matplotlib.contour import ContourSet
 
 from src.utils.math_utils import meshgrid_points
+from src.utils.plot_utils import plot_meshgrid
 
 
 class Component(ABC):
@@ -34,8 +34,8 @@ class Component(ABC):
         """
         raise NotImplementedError
 
-    def evaluate(self, points: np.array, occupancy: np.array) ->\
-            Tuple[np.array, np.array, np.array, np.array]:
+    def evaluate(self, points: np.array, occupancy: np.array) -> \
+            Tuple[np.array, np.array, np.array, np.array, bool]:
         """ evaluation of points
         :param points array of n points to be evaluated (2 x n)
         :param occupancy 1d array with information about the points occupancy,
@@ -44,15 +44,20 @@ class Component(ABC):
         :return tpr, true positive rate
         :return prec, precision
         :return recall
+        :return flag (boolean) does at least one point coincide with the comp.
         """
         pred, mask = self.predict(points)
         gth = occupancy[mask]
+
+        # exception for component where no point coincides
+        if len(pred) == 0:
+            return 0, 0, 0, 0, False
 
         # extract relevant evaluation metrics
         fpr, tpr, _ = metrics.roc_curve(gth, pred)
         prec, recall, _ = metrics.precision_recall_curve(gth, pred)
 
-        return fpr, tpr, prec, recall
+        return fpr, tpr, prec, recall, True
 
 
 class Composite(Component):
@@ -110,15 +115,7 @@ class Composite(Component):
                                      np.sum(weights[col_mask]))
         return np.array(pred_weighted), mask
 
-    def plot(self, ax: Axes, resolution: int = 10, show_patch: bool = True,
-             show_id: bool = False) -> ContourSet:
-        """ plot composite onto axes of a matplotlib figure
-        :param ax is the matplotlib axes to be plotted onto
-        :param resolution of predicted points per unit length for plotting
-        :param show_patch shows the cells shape in the plot
-        :param show_id shows the resp. id of each cell
-        :return mapping -> colormap to be added to the figure separately
-        """
+    def predicted_meshgrid_points(self, resolution: int = 10):
         points, x, y = meshgrid_points(x_start=self.x_limits["min"],
                                        x_end=self.x_limits["max"],
                                        y_start=self.y_limits["min"],
@@ -130,12 +127,23 @@ class Composite(Component):
         pred_all = np.empty(points.shape[1])
         pred_all[:] = np.nan
         pred_all[mask] = pred
+        zz = pred_all.reshape(len(y), len(x))
+
+        return x, y, zz
+
+    def plot(self, ax: Axes, resolution: int = 10, show_patch: bool = True,
+             show_id: bool = False) -> ContourSet:
+        """ plot composite onto axes of a matplotlib figure
+        :param ax is the matplotlib axes to be plotted onto
+        :param resolution of predicted points per unit length for plotting
+        :param show_patch shows the cells shape in the plot
+        :param show_id shows the resp. id of each cell
+        :return mapping -> colormap to be added to the figure separately
+        """
+        x, y, zz = self.predicted_meshgrid_points(resolution=resolution)
 
         # plot onto axes
-        mapping = ax.contourf(x, y, pred_all.reshape(len(y), len(x)),
-                              levels=10, cmap='binary')
-        ax.set_facecolor('lightcoral')
-        plt.axis('scaled')
+        mapping = plot_meshgrid(ax=ax, x=x, y=y, zz=zz)
         for lhm in self.get_lhm_collection():
             if show_patch:
                 ax.add_patch(lhm.cell.patch())  # add patches
