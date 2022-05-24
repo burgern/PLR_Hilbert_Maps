@@ -1,13 +1,16 @@
-from config import PATH_LOG
 import os
 from typing import Dict
-from config import load_config
+import sys
 import json
-from src.hilbert_map import LocalHilbertMap, LocalHilbertMapCollection, MapManager
-from typing import Optional, List
+from typing import Optional, List, Union
 import numpy as np
 import torch
 import pickle
+
+from config import load_config, PATH_LOG
+from src.hilbert_map import LocalHilbertMap, LocalHilbertMapCollection, \
+    MapManager
+
 
 
 class Logger:
@@ -17,35 +20,28 @@ class Logger:
         log
         |---config.json  (config_path)
         |
-        |---lhmc.pkl  (example of usage with save_as_pickle function)
-        |---hm.pkl  (example of usage with save_as_pickle function)
+        |---model.pkl  (use model.save_model(model) function after last update)
         |
         |---update_00001  (curr_update_dir)
         |    |
         |    |---lhm  (lhm_dir)
         |    |    |
         |    |    |---lhm_00001  (curr_lhm_dir)
-        |    |    |    |---tpr.npy
-        |    |    |    |---fpr.npy
-        |    |    |    |---precision.npy
-        |    |    |    |---recall.npy
+        |    |    |    |---pred.npy
+        |    |    |    |---gth.npy
         |    |    |    |---model.pt
         |    |    |
         |    |    |---lhm_00002
-        |    |    |    |---tpr.npy
-        |    |    |    |---fpr.npy
-        |    |    |    |---precision.npy
-        |    |    |    |---recall.npy
+        |    |    |    |---pred.npy
+        |    |    |    |---gth.npy
         |    |    |    |---model.pt
         |    |    |
         |    |    |---...
         |    |
         |    |---lhmc  (lhmc_dir)
         |    |    |
-        |    |    |---tpr.npy
-        |    |    |---fpr.npy
-        |    |    |---precision.npy
-        |    |    |---recall.npy
+        |    |    |---pred.npy
+        |    |    |---gth.npy
         |    |    |---x_meshgrid.npy
         |    |    |---y_meshgrid.npy
         |    |    |---zz_meshgrid.npy
@@ -69,7 +65,12 @@ class Logger:
         self.curr_update_dir = None
 
     def _setup(self):
-        # set up log directory for experiment
+        # set up log directory for experiment if not yet already existing
+        if os.path.exists(self.exp_path):
+            continue_flag = input("log path already exists, do you want to " +
+                                  "overwrite? hit enter -> yes, any input -> no")
+            if continue_flag == "":
+                sys.exit()
         self.create_dir(self.exp_path)
 
         # log configuration
@@ -77,26 +78,32 @@ class Logger:
         with open(config_path, 'w') as file:
             json.dump(self.config, file, indent=4)
 
-    def update(self, data: Optional[np.array] = None, lhm: Optional[List[LocalHilbertMap]] = None,
-               lhmc: Optional[LocalHilbertMapCollection] = None, map_manager: Optional[MapManager] = None):
+    def update(self, data: Optional[np.array] = None,
+               model: Optional[Union[LocalHilbertMap,
+                                     LocalHilbertMapCollection]] = None):
         # set up directory for logging this specific update
-        self.curr_update_dir = os.path.join(self.exp_path, f"update_{self.step:05}")
+        self.curr_update_dir = os.path.join(self.exp_path,
+                                            f"update_{self.step:05}")
         self.create_dir(self.curr_update_dir)
 
-        # log updates if they are given
+        # save data if given
         if data is not None:
             self.log_data(data)
-            if lhm is not None:
-                self.log_lhm(lhm, data)
-            if lhmc is not None:
-                self.log_lhmc(lhmc, data)
+
+        # save model specific files (different for LHM, LHMC and NHM)
+        if type(model) == LocalHilbertMap:
+            self.log_lhm([model, data]) if data is not None else \
+                self.log_lhm([model])
+        elif type(model) == LocalHilbertMapCollection:
+            if data is not None:
+                self.log_lhmc(model, data)
+                self.log_lhm(model.lhm_collection, data)
+            else:
+                self.log_lhmc(model)
+                self.log_lhm(model.lhm_collection)
+            self.log_map_manager(model.map_manager)
         else:
-            if lhm is not None:
-                self.log_lhm(lhm)
-            if lhmc is not None:
-                self.log_lhmc(lhmc)
-        if map_manager is not None:
-            self.log_map_manager(map_manager)
+            return ValueError
 
         # increase step for next update
         self.step += 1
@@ -121,43 +128,45 @@ class Logger:
             model_path = os.path.join(curr_lhm_dir, "model.pt")
             torch.save(model, model_path)
 
-            # save evaluations if there is data given
+            # save prediction and ground truth if there is data given
             if data is not None:
-                fpr, tpr, prec, recall = lhm.evaluate(points=data[0:2, :],
-                                                      occupancy=data[2, :])
-                np.save(os.path.join(curr_lhm_dir, "fpr.npy"), fpr)
-                np.save(os.path.join(curr_lhm_dir, "tpr.npy"), tpr)
-                np.save(os.path.join(curr_lhm_dir, "precision.npy"), prec)
-                np.save(os.path.join(curr_lhm_dir, "recall.npy"), recall)
+                self.save_pred_and_gth(model=lhm, dir_path=curr_lhm_dir,
+                                       points=data[0:2, :],
+                                       occupancy=data[2, :])
 
-    def log_lhmc(self, lhmc: LocalHilbertMapCollection, data: Optional[np.array]):
+    def log_lhmc(self, lhmc: LocalHilbertMapCollection,
+                 data: Optional[np.array]):
         # set up directory for logging lhmc
         lhmc_dir = os.path.join(self.curr_update_dir, "lhmc")
         self.create_dir(lhmc_dir)
 
         # save lhmc numpy plot
-        x, y, zz = lhmc.predict_meshgrid(resolution=1001)
+        x, y, zz = lhmc.predicted_meshgrid_points()
         np.save(os.path.join(lhmc_dir, "x_meshgrid.npy"), x)
         np.save(os.path.join(lhmc_dir, "y_meshgrid.npy"), y)
         np.save(os.path.join(lhmc_dir, "zz_meshgrid.npy"), zz)
 
-        # save evaluations if there is data given
-        # TODO implement this -> adapt lhmc predict function
-        # if data is not None:
-        #     fpr, tpr, prec, recall = lhmc.evaluate(points=data[0:2, :],
-        #                                            occupancy=data[2, :])
-        #     np.save(os.path.join(lhmc_dir, "fpr.npy"), fpr)
-        #     np.save(os.path.join(lhmc_dir, "tpr.npy"), tpr)
-        #     np.save(os.path.join(lhmc_dir, "precision.npy"), prec)
-        #     np.save(os.path.join(lhmc_dir, "recall.npy"), recall)
+        # save prediction and ground truth if there is data given
+        if data is not None:
+            self.save_pred_and_gth(model=lhmc, dir_path=lhmc_dir,
+                                   points=data[0:2, :], occupancy=data[2, :])
+
+    @staticmethod
+    def save_pred_and_gth(model: Union[LocalHilbertMap,
+                                       LocalHilbertMapCollection],
+                          dir_path: str, points: np.array, occupancy: np.array):
+        pred, mask = model.predict(points)
+        gth = occupancy[mask]
+        np.save(os.path.join(dir_path, "pred.npy"), pred)
+        np.save(os.path.join(dir_path, "gth.npy"), gth)
 
     def log_map_manager(self, map_manager: MapManager):
-        map_path = os.path.join(self.curr_update_dir, "data.npy")
+        map_path = os.path.join(self.curr_update_dir, "map.npy")
         np.save(map_path, map_manager.map_indices)
 
-    def save_as_pickle(self, file_name: str, source):
-        pickel_path = os.path.join(self.exp_path, file_name)
-        with open(pickel_path, 'wb') as file:
+    def save_model(self, source):
+        pkl_path = os.path.join(self.exp_path, "model.pkl")
+        with open(pkl_path, 'wb') as file:
             pickle.dump(source, file)
 
     @staticmethod
