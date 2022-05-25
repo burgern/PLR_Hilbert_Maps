@@ -7,6 +7,12 @@ import numpy as np
 from config import load_config
 from utils import generate_data, create_model, set_up_logger, CommandLineHandler
 from evaluation.evaluator import Evaluator
+import torch
+import random
+
+torch.manual_seed(1)
+random.seed(1)
+np.random.seed(1)
 
 def run_experiment(config: Dict, exp_name: str = ""):
     # generate data
