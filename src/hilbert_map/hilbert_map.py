@@ -10,24 +10,25 @@ from torch import no_grad
 from .cell.square import Square
 import json
 import numpy as np
+from typing import Union, Dict
 
 class HilbertMap(Composite):
     """
     Hilbert Map
     TODO hadzica: Description
     """
-    def __init__(self, config_path: str):
+    def __init__(self, config: Union[str, Dict]):
         super().__init__()
-        with open(config_path) as f:
-            config = json.load(f)
+        if type(config) == str:
+            with open(config) as f:
+                config = json.load(f)
 
         if config["global"]["loss"] == "BCE":
             global_loss = nn.BCELoss()
         elif config["global"]["loss"] == "BCEWithLogitsLoss":
             global_loss = nn.BCEWithLogitsLoss()
         else:
-            # TODO hadzica: Add other cases.
-            raise NotImplementedError
+            raise ValueError
 
         global_lr = config["global"]["lr"]
         global_bs = config["global"]["batch_size"]
@@ -37,21 +38,18 @@ class HilbertMap(Composite):
         elif config["global"]["model"] == "AverageLayer":
             global_model = AverageLayer()
         else:
-            # TODO hadzica: Add other cases.
-            raise NotImplementedError
-        self.global_map = BaseModel(global_model, global_loss, global_lr, global_bs, global_epochs)
-        x_neighbour_dist = config["global"]["overlap_in_x"]
-        y_neighbour_dist = config["global"]["overlap_in_y"]
+            raise ValueError
 
-        self.local_map_collection = LocalHilbertMapCollection(config, x_neighbour_dist=x_neighbour_dist,
-                                                              y_neighbour_dist=y_neighbour_dist)
+        self.global_map = BaseModel(global_model, global_loss, global_lr, global_bs, global_epochs)
+
+        self.local_map_collection = LocalHilbertMapCollection(config)
 
     def update(self, points: np.array, occupancy: np.array):
         self.local_map_collection.update(points, occupancy)
         with no_grad():
             local_map_outputs, local_map_output_masks = self.local_map_collection.predict_lhm(points)
 
-        self.global_map.train(local_map_outputs, occupancy, print_loss=True)
+        self.global_map.train(local_map_outputs, occupancy, print_loss=False)
 
         self.x_limits["min"] = self.local_map_collection.map_manager.x_min
         self.x_limits["max"] = self.local_map_collection.map_manager.x_max

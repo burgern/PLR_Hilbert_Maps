@@ -9,7 +9,7 @@ import pickle
 
 from config import load_config, PATH_LOG
 from src.hilbert_map import LocalHilbertMap, LocalHilbertMapCollection, \
-    MapManager
+    MapManager, HilbertMap
 
 
 
@@ -96,12 +96,21 @@ class Logger:
                 self.log_lhm([model])
         elif type(model) == LocalHilbertMapCollection:
             if data is not None:
-                self.log_lhmc(model, data)
+                self.log_gm(model, data)
                 self.log_lhm(model.lhm_collection, data)
             else:
-                self.log_lhmc(model)
+                self.log_gm(model)
                 self.log_lhm(model.lhm_collection)
             self.log_map_manager(model.map_manager)
+        elif type(model) == HilbertMap:
+            if data is not None:
+                self.log_gm(model, data)
+                self.log_lhm(model.local_map_collection.lhm_collection, data)
+            else:
+                self.log_gm(model)
+                self.log_lhm(model.lhm_collection)
+            self.log_map_manager(model.local_map_collection.map_manager)
+
         else:
             return ValueError
 
@@ -134,10 +143,10 @@ class Logger:
                                        points=data[0:2, :],
                                        occupancy=data[2, :])
 
-    def log_lhmc(self, lhmc: LocalHilbertMapCollection,
-                 data: Optional[np.array]):
+    def log_gm(self, lhmc: Union[LocalHilbertMapCollection, HilbertMap],
+               data: Optional[np.array]):
         # set up directory for logging lhmc
-        lhmc_dir = os.path.join(self.curr_update_dir, "lhmc")
+        lhmc_dir = os.path.join(self.curr_update_dir, "global_map")
         self.create_dir(lhmc_dir)
 
         # save lhmc numpy plot

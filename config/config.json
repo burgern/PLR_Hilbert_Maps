@@ -1,6 +1,6 @@
 {
   "model": {
-    "model": "lhmc",
+    "model": "hm",
     "lhm": {
       "center_x": 0,
       "center_y": 0
@@ -20,9 +20,9 @@
   "global": {
     "model": "LogisticRegression",
     "loss": "BCE",
-    "lr": 0.1,
-    "batch_size": 1024,
-    "epochs": 50,
+    "lr": 0.01,
+    "batch_size": 256,
+    "epochs": 10,
     "overlap_in_x": 1,
     "overlap_in_y": 1
   },

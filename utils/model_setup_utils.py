@@ -4,6 +4,7 @@ from datetime import datetime
 from src.hilbert_map.local_hilbert_map import LocalHilbertMap
 from src.hilbert_map.local_hilbert_map_collection import \
     LocalHilbertMapCollection
+from src.hilbert_map.hilbert_map import HilbertMap
 from src.data import DatasetHexagon, DataIntelLab, DataFreiburg079,\
     DataFreiburgCampus
 from evaluation.logger import Logger
@@ -30,6 +31,8 @@ def create_model(config: Dict):
                                         config["model"]["lhm"]["center_y"]))
     elif config["model"]["model"] == "lhmc":
         model = LocalHilbertMapCollection(config=config)
+    elif config["model"]["model"] == "hm":
+        model = HilbertMap(config)
     else:
         raise ValueError
     return model

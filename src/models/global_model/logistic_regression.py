@@ -12,7 +12,7 @@ class LogisticRegression(nn.Module):
         super(LogisticRegression, self).__init__()
         scalar = randn(1)
         self.bias = nn.Parameter(scalar)
-        self.weights_pool = nn.Parameter(ones(100))
+        self.weights_pool = nn.Parameter(ones(1000000))
         self.weights_pool_counter = 0
         self.weights = []
         self.weight_history = []

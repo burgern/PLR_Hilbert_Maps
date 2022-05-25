@@ -72,9 +72,5 @@ class LocalHilbertMapCollection(Composite):
             mask = mask | lhm.cell.is_point_in_cell(points)
         return mask
 
-    def save(self, path: str):
-        with open(path, 'wb') as file:
-            pickle.dump(self, file, protocol=pickle.HIGHEST_PROTOCOL)
-
     def get_lhm_collection(self):
         return self.lhm_collection

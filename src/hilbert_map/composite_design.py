@@ -4,6 +4,7 @@ import numpy as np
 from typing import Tuple
 from matplotlib.axes import Axes
 from matplotlib.contour import ContourSet
+import pickle
 
 from src.utils.math_utils import meshgrid_points
 from src.utils.plot_utils import plot_meshgrid
@@ -151,6 +152,10 @@ class Composite(Component):
                 ax.text(lhm.cell.center[0], lhm.cell.center[1], str(lhm.id),
                         color="orange", fontsize=12)
         return mapping
+
+    def save(self, path: str):
+        with open(path, 'wb') as file:
+            pickle.dump(self, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 class Leaf(Component):

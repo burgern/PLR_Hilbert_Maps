@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from math import cos, sin
 
 from config import PATH_LOG
-from src.hilbert_map import LocalHilbertMap, LocalHilbertMapCollection
+from src.hilbert_map import LocalHilbertMap, LocalHilbertMapCollection, HilbertMap
 from src.utils.plot_utils import plot_meshgrid
 from utils.plot_utils import plot_pr, plot_roc
 from utils.model_setup_utils import generate_data
@@ -123,6 +123,9 @@ class Evaluator:
         elif type(model) == LocalHilbertMapCollection:
             model.plot(ax=ax_plot, resolution=10, show_patch=True,
                        show_id=False)
+        elif type(model) == HilbertMap:
+            model.plot(ax=ax_plot, resolution=10, show_patch=True,
+                       show_id=False)
         else:
             raise ValueError
         ax_plot.axis('equal')
@@ -190,13 +193,13 @@ class Evaluator:
 
     def load_lhmc_eval(self, update: int) -> Tuple:
         update_dir = self.get_update_dir_path(update=update)
-        lhmc_path = join(update_dir, "lhmc")
+        lhmc_path = join(update_dir, "global_map")
         out = self.load_np_from_dir(dir_path=lhmc_path, files=EVAL_FILES)
         return out[0], out[1]
 
     def load_lhmc_plot(self, update: int) -> Tuple:
         update_dir = self.get_update_dir_path(update=update)
-        lhmc_path = join(update_dir, "lhmc")
+        lhmc_path = join(update_dir, "global_map")
         out = self.load_np_from_dir(dir_path=lhmc_path, files=PLOT_FILES)
         return out[0], out[1], out[2]
 
