@@ -8,8 +8,8 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
-from matplotlib import cm
 from math import cos, sin
+import torch
 
 from config import PATH_LOG
 from src.hilbert_map import LocalHilbertMap, LocalHilbertMapCollection,\
@@ -147,11 +147,11 @@ class Evaluator:
         @:return returns colormapping which can be added to figure
         """
         ax.clear()
-        if self.model == "lhm":
+        if self.model == "lhm_old":
             model = self.load_lhm_model(update=update)
             mapping = model.plot(ax=ax)
             return mapping
-        elif self.model in ["lhmc", "hm"]:
+        elif self.model in ["lhmc", "hm", "lhm"]:
             x, y, zz = self.load_gm_plot(update=update)
         else:
             raise ValueError
@@ -163,22 +163,24 @@ class Evaluator:
         return mapping
 
     def plot_roc_at_update(self, ax: Axes, update: int):
-        if self.model == "lhm":
+        if self.model == "lhm_old":
             pred, gth = self.load_lhm_eval(update=update)
-        elif self.model in ["lhmc", "hm"]:
+        elif self.model in ["lhmc", "hm", "lhm"]:
             pred, gth = self.load_gm_eval(update=update)
         else:
             raise ValueError
-        plot_roc(ax=ax, pred=pred, gth=gth)
+        if pred.size > 0:
+            plot_roc(ax=ax, pred=pred, gth=gth)
 
     def plot_pr_at_update(self, ax: Axes, update: int):
-        if self.model == "lhm":
+        if self.model == "lhm_old":
             pred, gth = self.load_lhm_eval(update=update)
-        elif self.model in ["lhmc", "hm"]:
+        elif self.model in ["lhmc", "hm", "lhm"]:
             pred, gth = self.load_gm_eval(update=update)
         else:
             raise ValueError
-        plot_pr(ax=ax, pred=pred, gth=gth)
+        if pred.size > 0:
+            plot_pr(ax=ax, pred=pred, gth=gth)
 
     def load_config(self) -> Dict:
         config_path = join(self.exp_path, "config.json")
@@ -203,11 +205,11 @@ class Evaluator:
         data_path = join(update_dir, "data.npy")
         return np.load(data_path)
 
-    def load_lhm_model(self, update: int, lhm_id: int = 1) -> LocalHilbertMap:
+    def load_lhm_model(self, update: int, lhm_id: int = 0) -> LocalHilbertMap:
         update_dir = self.get_update_dir_path(update=update)
-        lhm_path = join(update_dir, "lhm", f"lhm_{lhm_id:05}")
+        lhm_path = join(update_dir, "lhm", f"lhm_{lhm_id:05}", "model.pt")
         with open(lhm_path, "rb") as file:
-            lhm = pickle.load(file)
+            lhm = torch.load(file)
         return lhm
 
     def load_lhm_eval(self, update: int, lhm_id: int) -> Tuple:

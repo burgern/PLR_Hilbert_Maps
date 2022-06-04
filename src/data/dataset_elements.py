@@ -1,6 +1,7 @@
 from src.hilbert_map import Square, Rectangle, Circle, Ellipsoid, Hexagon
 import numpy as np
 from matplotlib.axes import Axes
+import matplotlib.pyplot as plt
 from typing import Optional, Dict, Tuple
 
 
