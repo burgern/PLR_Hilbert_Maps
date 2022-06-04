@@ -18,11 +18,11 @@
     "max_data_buffer_length": 1000
   },
   "global": {
-    "model": "LogisticRegression",
+    "model": "MLP_global",
     "loss": "BCE",
     "lr": 0.01,
     "batch_size": 256,
-    "epochs": 10,
+    "epochs": 20,
     "overlap_in_x": 1,
     "overlap_in_y": 1
   },

@@ -3,6 +3,7 @@ from .map_manager import GridMap
 from .local_hilbert_map_collection import LocalHilbertMapCollection
 from ..models.global_model.logistic_regression import LogisticRegression
 from ..models.global_model.average_layer import AverageLayer
+from ..models.global_model.mlp_global import MLP_global
 from src.models.base_model import BaseModel
 from src.models.local_model.mlp import MLP
 import torch.nn as nn
@@ -37,6 +38,8 @@ class HilbertMap(Composite):
             global_model = LogisticRegression()
         elif config["global"]["model"] == "AverageLayer":
             global_model = AverageLayer()
+        elif config["global"]["model"] == "MLP_global":
+            global_model = MLP_global()
         else:
             raise ValueError
 
