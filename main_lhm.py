@@ -17,8 +17,8 @@ from src.models import BaseModel
 from src.utils.evaluation_utils import create_video_stream, create_gif_from_mp4
 from utils.plot_utils import plot_roc, plot_pr
 
-CENTER = (0, 0)
-WIDTH = 8
+CENTER = (-2, 2)
+WIDTH = 4
 NX, NY = 0.5, 0.5
 
 LOCAL_MLP_CONFIG = {
@@ -34,7 +34,7 @@ LOCAL_MLP_CONFIG = {
 LOSS = nn.BCELoss()
 LEARNING_RATE = 0.01
 BATCH_SIZE = 16
-EPOCHS = 16
+EPOCHS = 1
 
 USE_BUFFER, BUFFER_LENGTH = True, 1000
 
@@ -91,14 +91,19 @@ def main(load_data: bool, gen_eval: bool, gen_video: bool,
     exp_name, exp_path = set_up_log(exp_name=exp_name)
 
     # run experiment
-    fig, ((ax_roc, ax_pr), (ax_data, ax_plot)) = \
-        plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
+    fig, ((ax_roc, ax_pr, empty), (ax_data_all, ax_data, ax_plot)) = \
+        plt.subplots(nrows=2, ncols=3, figsize=(12, 12))
     ax_data.axis('equal')
     ax_data.set_xlim(x_min, x_max)
     ax_data.set_ylim(y_min, y_max)
     ax_plot.axis('equal')
     ax_plot.set_xlim(x_min, x_max)
     ax_plot.set_ylim(y_min, y_max)
+    ax_data_all.scatter(x=points_all[0, :], y=points_all[1, :], c=occupancy_all,
+                            cmap="viridis", s=1)
+    ax_data_all.axis('equal')
+    ax_data_all.set_xlim(x_min, x_max)
+    ax_data_all.set_ylim(y_min, y_max)
     for update_ind, (points, occupancy, _) in enumerate(dataset):
         print(f"current update: {update_ind+1}")
         lhm.update(points, occupancy)
@@ -142,6 +147,7 @@ def main(load_data: bool, gen_eval: bool, gen_video: bool,
         os.rename(video_path, new_video_path)
         gif_path = create_gif_from_mp4(video_path=new_video_path)
 
+    del lhm
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ class LocalHilbertMap(Leaf):
     """
     def __init__(self, config: Union[Dict, Tuple[Cell, BaseModel, bool, int]],
                  center: Optional[Tuple[float, float]] = None,
-                 id: Optional[int] = None):
+                 id: Optional[int] = None, update_buffer_min: int = 1):
         self.config = config
         self.id = id
         self.center = center
@@ -34,8 +34,8 @@ class LocalHilbertMap(Leaf):
         else:
             self.cell, self.local_model = config[0], config[1]
             self.center = self.cell.center
-        self.point_buffer = None
-        self.occupancy_buffer = None
+        self.point_buffer = np.empty((2, 0))
+        self.occupancy_buffer = np.empty(0)
         if type(config) == dict:
             self.use_buffer = config["local"]["use_buffer"]
             self.max_data_buffer_length = \
@@ -44,15 +44,41 @@ class LocalHilbertMap(Leaf):
             self.use_buffer = config[2]
             self.max_data_buffer_length = config[3]
 
+        # update buffer
+        self.update_buffer_points = np.empty((2, 0))
+        self.update_buffer_occupancy = np.empty(0)
+        self.update_buffer_min = update_buffer_min
+
     def update(self, points: np.array, occupancy: np.array):
         points, mask = self.mask_points(points)
         occupancy = occupancy[mask]
         points = self.cell.original_to_normalized(points)
-        if self.use_buffer and np.sum(mask) > 0:
-            self.do_buffer_management(points, occupancy)
-            self.local_model.train(self.point_buffer, self.occupancy_buffer)
+        wait_for_update_buffer, points, occupancy = \
+            self.update_buffer_update(points, occupancy)
+        if wait_for_update_buffer:
+            pass
         else:
-            self.local_model.train(points, occupancy)
+            if self.use_buffer and np.sum(mask) > 0:
+                self.update_buffer_method_1(points, occupancy)
+                self.local_model.train(self.point_buffer, self.occupancy_buffer)
+            else:
+                self.local_model.train(points, occupancy)
+
+    def update_buffer_update(self, points: np.array, occupancy: np.array) \
+            -> Tuple[bool, Optional[np.array], Optional[np.array]]:
+        self.update_buffer_points = np.hstack((self.update_buffer_points,
+                                               points))
+        self.update_buffer_occupancy = \
+            np.hstack((self.update_buffer_occupancy, occupancy))
+        if self.update_buffer_points.shape[1] < self.update_buffer_min:
+            return True, None, None
+        else:
+            points = self.update_buffer_points
+            occupancy = self.update_buffer_occupancy
+            self.update_buffer_points = np.empty((2, 0))
+            self.update_buffer_occupancy = np.empty(0)
+            return False, points, occupancy
+
 
     def predict(self, points: np.array) -> Tuple[np.array, np.array]:
         points, mask = self.mask_points(points)
@@ -176,7 +202,7 @@ class LocalHilbertMap(Leaf):
 
         return cell, local_model
 
-    def do_buffer_management(self, points: np.array, occupancy: np.array):
+    def update_buffer_method_1(self, points: np.array, occupancy: np.array):
         if (self.point_buffer is None) and (self.occupancy_buffer is None):
             self.point_buffer = points
             self.occupancy_buffer = occupancy
@@ -191,3 +217,12 @@ class LocalHilbertMap(Leaf):
             if buffer_overflow > 0:
                 self.point_buffer = self.point_buffer[:, buffer_overflow:]
                 self.occupancy_buffer = self.occupancy_buffer[buffer_overflow:]
+
+    def update_buffer_method_2(self, points: np.array, occupancy: np.array, ratio):
+        """
+        Keep
+        :param points:
+        :param occupancy:
+        :return:
+        """
+        pass
