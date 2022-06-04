@@ -1,9 +1,9 @@
 {
   "model": {
-    "model": "hm",
+    "model": "lhm",
     "lhm": {
-      "center_x": 0,
-      "center_y": 0
+      "center_x": 14,
+      "center_y": -4
     },
     "lhmc": {},
     "hm": {}
@@ -15,7 +15,8 @@
     "lr": 0.01,
     "batch_size": 16,
     "epochs": 16,
-    "max_data_buffer_length": 1000
+    "max_data_buffer_length": 1000,
+    "use_buffer": false
   },
   "global": {
     "model": "LogisticRegression",
@@ -34,7 +35,7 @@
     "ny": 0.5,
     "center": "None",
     "square": {
-      "width": 5
+      "width": 8
     },
     "rectangle": {
       "width": 2,
@@ -69,7 +70,7 @@
     "intel_lab": {
       "shuffle_seed": null,
       "skip_vp": 1,
-      "tot_viewpoints": 30,
+      "tot_viewpoints": 50,
       "invalid_scan_dist": 20
     },
     "freiburg_079": {
