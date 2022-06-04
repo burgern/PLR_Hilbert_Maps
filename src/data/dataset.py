@@ -4,8 +4,12 @@ import numpy as np
 import math
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
-from src.utils.evaluation_utils import timeit
 import time
+import pickle
+
+from src.hilbert_map import Cell
+from src.utils.evaluation_utils import timeit
+from config.paths import PATH_LOG_DATASET
 
 
 class Dataset:
@@ -45,6 +49,15 @@ class Dataset:
         self.generate_data()  # generate occupancy and free spaces from scan
         self.preprocess_data()  # preprocessing step on generated data
         self.evaluate_data()  # evaluate generated and preprocessed data
+
+    def crop_to_cell(self, cell: Cell):
+        self.data = [x for x in self.data if
+                     np.any(cell.is_point_in_cell(x["points"]))]
+        for update in self.data:
+            mask = cell.is_point_in_cell(update["points"])
+            update["points"] = update["points"][:, mask]
+            update["occupancy"] = update["occupancy"][mask]
+
 
     def data_concatenated(self):
         points = np.empty((2, 0))
@@ -187,3 +200,7 @@ class Dataset:
         data = self.data[self.current_viewpoint]
         self.current_viewpoint += 1
         return data["points"], data["occupancy"], None
+
+    def save(self):
+        with open(PATH_LOG_DATASET, 'wb') as file:
+            pickle.dump(self, file, protocol=pickle.HIGHEST_PROTOCOL)
