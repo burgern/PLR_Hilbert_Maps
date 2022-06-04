@@ -95,6 +95,10 @@ class Logger:
         if type(model) == LocalHilbertMap:
             self.log_lhm([model], data) if data is not None else \
                 self.log_lhm([model])
+            if data is not None:
+                self.log_gm(model, data)
+            else:
+                self.log_gm(model)
         elif type(model) == LocalHilbertMapCollection:
             if data is not None:
                 self.log_gm(model, data)

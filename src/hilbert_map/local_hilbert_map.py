@@ -60,6 +60,23 @@ class LocalHilbertMap(Leaf):
         pred = self.local_model.predict(points)
         return pred, mask
 
+    def predicted_meshgrid_points(self, resolution: int = 10):
+        points, x, y = meshgrid_points(
+            x_start=self.cell.center[0] - self.cell.r1_mag,
+            x_end=self.cell.center[0] + self.cell.r1_mag,
+            y_start=self.cell.center[1] - self.cell.r2_mag,
+            y_end=self.cell.center[1] + self.cell.r2_mag,
+            resolution=resolution)
+
+        # compute weighted predictions of relevant points
+        pred, mask = self.predict(points=points)
+        pred_all = np.empty(points.shape[1])
+        pred_all[:] = np.nan
+        pred_all[mask] = pred
+        zz = pred_all.reshape(len(y), len(x))
+
+        return x, y, zz
+
     def mask_points(self, points: np.array) -> np.array:
         """ masking points which are part of current cell """
         mask = self.cell.is_point_in_cell(points)

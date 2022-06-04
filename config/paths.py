@@ -14,6 +14,7 @@ PATH_PLR = os.path.join(Path.home(), LOCAL_PLR)
 # useful paths for reference
 PATH_LOG = os.path.join(PATH_PLR, "log")
 PATH_LOG_DATA = os.path.join(PATH_LOG, "dataset")
+PATH_LOG_DATASET = os.path.join(PATH_LOG, "dataset.pkl")
 PATH_LOG_EXP = os.path.join(PATH_LOG, "experiments")
 PATH_DATA = os.path.join(PATH_PLR, "dataset")
 PATH_CONFIG = os.path.join(PATH_PLR, 'config')
