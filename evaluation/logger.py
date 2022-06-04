@@ -38,7 +38,7 @@ class Logger:
         |    |    |
         |    |    |---...
         |    |
-        |    |---lhmc  (lhmc_dir)
+        |    |---global_map  (global_map_dir)
         |    |    |
         |    |    |---pred.npy
         |    |    |---gth.npy
@@ -80,7 +80,8 @@ class Logger:
 
     def update(self, data: Optional[np.array] = None,
                model: Optional[Union[LocalHilbertMap,
-                                     LocalHilbertMapCollection]] = None):
+                                     LocalHilbertMapCollection,
+                                     HilbertMap]] = None):
         # set up directory for logging this specific update
         self.curr_update_dir = os.path.join(self.exp_path,
                                             f"update_{self.step:05}")
@@ -92,7 +93,7 @@ class Logger:
 
         # save model specific files (different for LHM, LHMC and NHM)
         if type(model) == LocalHilbertMap:
-            self.log_lhm([model, data]) if data is not None else \
+            self.log_lhm([model], data) if data is not None else \
                 self.log_lhm([model])
         elif type(model) == LocalHilbertMapCollection:
             if data is not None:
@@ -121,7 +122,8 @@ class Logger:
         data_path = os.path.join(self.curr_update_dir, "data.npy")
         np.save(data_path, data)
 
-    def log_lhm(self, lhm_: List[LocalHilbertMap], data: Optional[np.array]):
+    def log_lhm(self, lhm_: List[LocalHilbertMap],
+                data: Optional[np.array] = None):
         # set up directory for logging lhm's
         lhm_dir = os.path.join(self.curr_update_dir, "lhm")
         self.create_dir(lhm_dir)
@@ -146,18 +148,18 @@ class Logger:
     def log_gm(self, lhmc: Union[LocalHilbertMapCollection, HilbertMap],
                data: Optional[np.array]):
         # set up directory for logging lhmc
-        lhmc_dir = os.path.join(self.curr_update_dir, "global_map")
-        self.create_dir(lhmc_dir)
+        global_map_dir = os.path.join(self.curr_update_dir, "global_map")
+        self.create_dir(global_map_dir)
 
         # save lhmc numpy plot
         x, y, zz = lhmc.predicted_meshgrid_points()
-        np.save(os.path.join(lhmc_dir, "x_meshgrid.npy"), x)
-        np.save(os.path.join(lhmc_dir, "y_meshgrid.npy"), y)
-        np.save(os.path.join(lhmc_dir, "zz_meshgrid.npy"), zz)
+        np.save(os.path.join(global_map_dir, "x_meshgrid.npy"), x)
+        np.save(os.path.join(global_map_dir, "y_meshgrid.npy"), y)
+        np.save(os.path.join(global_map_dir, "zz_meshgrid.npy"), zz)
 
         # save prediction and ground truth if there is data given
         if data is not None:
-            self.save_pred_and_gth(model=lhmc, dir_path=lhmc_dir,
+            self.save_pred_and_gth(model=lhmc, dir_path=global_map_dir,
                                    points=data[0:2, :], occupancy=data[2, :])
 
     @staticmethod

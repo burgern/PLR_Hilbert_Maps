@@ -1,6 +1,6 @@
 from src.hilbert_map import Square, Rectangle, Circle, Ellipsoid, Hexagon
 import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 from typing import Optional, Dict, Tuple
 
 
@@ -153,9 +153,11 @@ class DatasetHexagon:
             raise StopIteration
         return self.points, self.occupancy, self.reflectance
 
-    def plot(self):
-        plt.scatter(self.points[0, :], self.points[1, :], c=self.occupancy, s=1)
+    def visualize(self, ax: Axes, step_size: int):
+        ax.scatter(self.points[0, :], self.points[1, :], c=self.occupancy, s=1)
         plt.xlim(self.center[0] - self.size / 2, self.center[0] + self.size / 2)
         plt.ylim(self.center[1] - self.size / 2, self.center[1] + self.size / 2)
-        plt.axis('scaled')
-        plt.show()
+        ax.axis('scaled')
+
+    def concatenated(self):
+        return self.points, self.occupancy

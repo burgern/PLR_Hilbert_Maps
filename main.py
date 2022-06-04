@@ -60,7 +60,7 @@ def main(args: Namespace):
     evaluator = Evaluator(exp_name=exp_name)
     evaluator.evaluate_model()
     if args.gen_video:
-        evaluator.create_update_video_stream_for_component()
+        evaluator.create_update_video_stream()
 
 
 if __name__ == "__main__":

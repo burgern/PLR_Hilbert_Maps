@@ -47,6 +47,7 @@ class LocalHilbertMapCollection(Composite):
         # get required new Leafs from MapManager
         new_cells = self.map_manager.update(points_not_in_lhmc)
         new_lhms = [LocalHilbertMap(config=(cell, self.local_model.new_model(),
+                                            self.config["local"]["use_buffer"],
                                             self.config["local"]["max_data_buffer_length"]),
                                     id=self.prev_id + cell_idx + 1)
                     for cell_idx, cell in enumerate(new_cells)]

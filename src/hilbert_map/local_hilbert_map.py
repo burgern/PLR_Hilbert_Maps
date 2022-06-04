@@ -23,7 +23,7 @@ class LocalHilbertMap(Leaf):
     Local Hilbert Map
     TODO Description
     """
-    def __init__(self, config: Union[Dict, Tuple[Cell, BaseModel, int]],
+    def __init__(self, config: Union[Dict, Tuple[Cell, BaseModel, bool, int]],
                  center: Optional[Tuple[float, float]] = None,
                  id: Optional[int] = None):
         self.config = config
@@ -37,16 +37,22 @@ class LocalHilbertMap(Leaf):
         self.point_buffer = None
         self.occupancy_buffer = None
         if type(config) == dict:
-            self.max_data_buffer_length = config["local"]["max_data_buffer_length"]
+            self.use_buffer = config["local"]["use_buffer"]
+            self.max_data_buffer_length = \
+                config["local"]["max_data_buffer_length"]
         else:
-            self.max_data_buffer_length = config[2]
+            self.use_buffer = config[2]
+            self.max_data_buffer_length = config[3]
 
     def update(self, points: np.array, occupancy: np.array):
         points, mask = self.mask_points(points)
         occupancy = occupancy[mask]
         points = self.cell.original_to_normalized(points)
-        self.do_buffer_management(points, occupancy)
-        self.local_model.train(self.point_buffer, self.occupancy_buffer)
+        if self.use_buffer and np.sum(mask) > 0:
+            self.do_buffer_management(points, occupancy)
+            self.local_model.train(self.point_buffer, self.occupancy_buffer)
+        else:
+            self.local_model.train(points, occupancy)
 
     def predict(self, points: np.array) -> Tuple[np.array, np.array]:
         points, mask = self.mask_points(points)
@@ -86,14 +92,14 @@ class LocalHilbertMap(Leaf):
         if ax is None:
             # plot directly
             mapping = plt.contourf(x, y, pred_all.reshape(len(y), len(x)),
-                                   levels=10, cmap='binary')
+                                   levels=np.linspace(0, 1, 11), cmap='binary')
             plt.colorbar(mapping)
             plt.show()
             return None
         else:
             # plot onto axes
             mapping = ax.contourf(x, y, pred_all.reshape(len(y), len(x)),
-                                  levels=10, cmap='binary')
+                                  levels=np.linspace(0, 1, 11), cmap='binary')
             return mapping
 
     def save(self, path: str):

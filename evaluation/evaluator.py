@@ -7,10 +7,13 @@ import json
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib import cm
 from math import cos, sin
 
 from config import PATH_LOG
-from src.hilbert_map import LocalHilbertMap, LocalHilbertMapCollection, HilbertMap
+from src.hilbert_map import LocalHilbertMap, LocalHilbertMapCollection,\
+    HilbertMap
 from src.utils.plot_utils import plot_meshgrid
 from utils.plot_utils import plot_pr, plot_roc
 from utils.model_setup_utils import generate_data
@@ -38,123 +41,144 @@ class Evaluator:
         self.update_dirs.sort()
         self.nr_updates = int(self.update_dirs[-1][-5:].lstrip('0'))
 
-    def create_update_video_stream_for_component(self, fps: int = 3) -> \
+        # extract relevant config information
+        self.config = self.load_config()
+        self.model = self.config["model"]["model"]
+        assert self.model in ["lhm", "lhmc", "hm"], "[EVALUATOR] model found " \
+                                                    "in config not possible"
+
+    def create_update_video_stream(self, fps: int = 3) -> \
             Tuple[str, str]:
-        fig, ((ax_roc, ax_pr, ax_data_curr),
+        fig, ((ax_roc, ax_pr, empty),
               (ax_data, ax_data_cumul, ax_plot)) = \
             plt.subplots(nrows=2, ncols=3, figsize=(12, 12))
+
+        # generated images path creation (empty)
         generated_images_path = join(self.exp_path, "generated_images")
         if not os.path.exists(generated_images_path):
             os.makedirs(generated_images_path)
 
         # ax_data (stays static)
-        config = self.load_config()
-        dataset = generate_data(config=config)
-        dataset.visualize(ax=ax_data, step_size=1)
-        ax_data.axis('equal')
+        dataset = self.plot_dataset(ax=ax_data)
 
         for update in range(1, self.nr_updates+1):
             # ax_data_cumul
-            data = self.load_data(update=update)
-            ax_data_cumul.scatter(data[0, :], data[1, :], c=data[2, :],
-                                  cmap="cool", s=1)
-            ax_data_cumul.axis('equal')
+            self.plot_dataset_at_update(ax=ax_data_cumul, update=update,
+                                        cmap="cool")
 
             # ax_plot
-            ax_plot.clear()
-            x, y, zz = self.load_lhmc_plot(update=update)
-            mapping = plot_meshgrid(ax=ax_plot, x=x, y=y, zz=zz)
+            pose = dataset[update - 1]["pose"]
+            mapping = self.plot_model(ax=ax_plot, update=update,
+                                      pose=(pose["position"][0],
+                                            pose["position"][1],
+                                            pose["angle"]))
             cb = fig.colorbar(mapping)
-            pose = dataset[update-1]["pose"]
-            position = pose["position"]
-            angle = pose["angle"]
-            size = 2
-            dir_vect = np.array([cos((angle)), sin((angle))]) * \
-                       size
-            ax_plot.quiver(position[0], position[1], dir_vect[0], dir_vect[1])
-            ax_plot.axis('equal')
 
             # evaluations: ax_roc and ax_pr
             ax_roc.clear()
             ax_pr.clear()
-            pred, gth = self.load_lhmc_eval(update=update)
-            plot_roc(ax=ax_roc, pred=pred, gth=gth)
-            plot_pr(ax=ax_pr, pred=pred, gth=gth)
+            self.plot_roc_at_update(ax=ax_roc, update=update)
+            self.plot_pr_at_update(ax=ax_pr, update=update)
 
+            # save figure
             fig.savefig(join(generated_images_path, f"update_{update:05}.png"))
 
-            ax_data_cumul.scatter(data[0, :], data[1, :], c=data[2, :],
-                                  cmap="viridis", s=1)
-            ax_data_cumul.axis('equal')
+            # set figure to standard for next iteration
+            self.plot_dataset_at_update(ax=ax_data_cumul, update=update,
+                                        cmap="viridis")
             cb.remove()
 
         # generate video in .mp4 and .gif format
         mp4_path = create_video_stream(image_folder=generated_images_path,
                                        fps=fps)
-        print(f"[EVALUATOR] generated mp4: {mp4_path}")
         gif_path = create_gif_from_mp4(mp4_path)
-        print(f"[EVALUATOR] generated gif: {gif_path}")
         return mp4_path, gif_path
 
     def evaluate_model(self, model: Optional[Union[LocalHilbertMap,
-                                                   LocalHilbertMapCollection]]
-            = None):
+                                                   LocalHilbertMapCollection,
+                                                   HilbertMap]] = None):
         fig, ((ax_roc, ax_pr), (ax_data, ax_plot)) = \
             plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
 
         model = self.load_model() if model is None else model
-        config = self.load_config()
+
+        # ax_data (stays static)
+        dataset = self.plot_dataset(ax=ax_data)
 
         # evaluations: ax_roc and ax_pr
-        dataset = generate_data(config=config)
         points, occupancy = dataset.data_concatenated()
         pred, mask = model.predict(points=points)
         gth = occupancy[mask]
         plot_roc(ax=ax_roc, pred=pred, gth=gth)
         plot_pr(ax=ax_pr, pred=pred, gth=gth)
 
-        # ax_data
-        dataset.visualize(ax=ax_data, step_size=1)
-        ax_data.axis('equal')
-
         # ax_plot
-        if type(model) == LocalHilbertMap:
-            model.plot(ax=ax_plot, resolution=100)
-        elif type(model) == LocalHilbertMapCollection:
-            model.plot(ax=ax_plot, resolution=10, show_patch=True,
-                       show_id=False)
-        elif type(model) == HilbertMap:
-            model.plot(ax=ax_plot, resolution=10, show_patch=True,
-                       show_id=False)
+        if self.model == "lhm":
+            mapping = model.plot(ax=ax_plot, resolution=100)
+            fig.colorbar(mapping)
+        elif self.model in ["lhmc", "hm"]:
+            mapping = model.plot(ax=ax_plot, resolution=10, show_patch=True,
+                                 show_id=False)
+            fig.colorbar(mapping)
         else:
             raise ValueError
         ax_plot.axis('equal')
+        # ax_data.get_shared_x_axes().join(ax_data, ax_plot)
 
         fig.show()
 
-    def evaluate_lhmc_at_update(self, update: Optional[int] = None):
-        update = self.nr_updates if update is None else update
-        fig, ((ax_roc, ax_pr), (ax_data, ax_plot)) = \
-            plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
+    def plot_dataset(self, ax: Axes):
+        dataset = generate_data(config=self.config)
+        dataset.visualize(ax=ax, step_size=1)
+        ax.axis('equal')
+        return dataset
 
-        # evaluations: ax_roc and ax_pr
-        pred, gth = self.load_lhmc_eval(update=update)
-        plot_roc(ax=ax_roc, pred=pred, gth=gth)
-        plot_pr(ax=ax_pr, pred=pred, gth=gth)
-
-        # ax_data
+    def plot_dataset_at_update(self, ax: Axes, update: int, cmap: str):
         data = self.load_data(update=update)
-        ax_data.scatter(data[0, :], data[1, :], c=data[2, :], cmap="viridis",
-                        s=1)
-        ax_data.axis('equal')
+        ax.scatter(data[0, :], data[1, :], c=data[2, :],
+                   cmap=cmap, s=1)
+        ax.axis('equal')
 
-        # ax_plot
-        x, y, zz = self.load_lhmc_plot(update=update)
-        mapping = plot_meshgrid(ax=ax_plot, x=x, y=y, zz=zz)
-        fig.colorbar(mapping)
-        ax_plot.axis('equal')
+    def plot_model(self, ax: Axes, update: int, size: float = 2,
+                   pose: Optional[Tuple[float, float, float]] = None):
+        """ visualize the models predictions at the current state over all
+        possible points
+        @:param pose creates an arrow showing the current (x_pos, y_pos, angle)
+        @:return returns colormapping which can be added to figure
+        """
+        ax.clear()
+        if self.model == "lhm":
+            model = self.load_lhm_model(update=update)
+            mapping = model.plot(ax=ax)
+            return mapping
+        elif self.model in ["lhmc", "hm"]:
+            x, y, zz = self.load_gm_plot(update=update)
+        else:
+            raise ValueError
+        mapping = plot_meshgrid(ax=ax, x=x, y=y, zz=zz)
+        if pose is not None:
+            dir_vect = np.array([cos((pose[2])), sin((pose[2]))]) * size
+            ax.quiver(pose[0], pose[1], dir_vect[0], dir_vect[1])
+        ax.axis('equal')
+        return mapping
 
-        fig.show()
+    def plot_roc_at_update(self, ax: Axes, update: int):
+        if self.model == "lhm":
+            pred, gth = self.load_lhm_eval(update=update)
+        elif self.model in ["lhmc", "hm"]:
+            pred, gth = self.load_gm_eval(update=update)
+        else:
+            raise ValueError
+        plot_roc(ax=ax, pred=pred, gth=gth)
+
+    def plot_pr_at_update(self, ax: Axes, update: int):
+        if self.model == "lhm":
+            pred, gth = self.load_lhm_eval(update=update)
+        elif self.model in ["lhmc", "hm"]:
+            pred, gth = self.load_gm_eval(update=update)
+        else:
+            raise ValueError
+        plot_pr(ax=ax, pred=pred, gth=gth)
 
     def load_config(self) -> Dict:
         config_path = join(self.exp_path, "config.json")
@@ -162,7 +186,8 @@ class Evaluator:
             out = json.load(file)
         return out
 
-    def load_model(self) -> Union[LocalHilbertMap, LocalHilbertMapCollection]:
+    def load_model(self) -> Union[LocalHilbertMap, LocalHilbertMapCollection,
+                                  HilbertMap]:
         model_path = join(self.exp_path, "model.pkl")
         with open(model_path, "rb") as file:
             model = pickle.load(file)
@@ -178,7 +203,7 @@ class Evaluator:
         data_path = join(update_dir, "data.npy")
         return np.load(data_path)
 
-    def load_lhm_model(self, update: int, lhm_id: int) -> LocalHilbertMap:
+    def load_lhm_model(self, update: int, lhm_id: int = 1) -> LocalHilbertMap:
         update_dir = self.get_update_dir_path(update=update)
         lhm_path = join(update_dir, "lhm", f"lhm_{lhm_id:05}")
         with open(lhm_path, "rb") as file:
@@ -191,16 +216,16 @@ class Evaluator:
         out = self.load_np_from_dir(dir_path=lhm_path, files=EVAL_FILES)
         return out[0], out[1]
 
-    def load_lhmc_eval(self, update: int) -> Tuple:
+    def load_gm_eval(self, update: int) -> Tuple:
         update_dir = self.get_update_dir_path(update=update)
         lhmc_path = join(update_dir, "global_map")
         out = self.load_np_from_dir(dir_path=lhmc_path, files=EVAL_FILES)
         return out[0], out[1]
 
-    def load_lhmc_plot(self, update: int) -> Tuple:
+    def load_gm_plot(self, update: int) -> Tuple:
         update_dir = self.get_update_dir_path(update=update)
-        lhmc_path = join(update_dir, "global_map")
-        out = self.load_np_from_dir(dir_path=lhmc_path, files=PLOT_FILES)
+        gm_path = join(update_dir, "global_map")
+        out = self.load_np_from_dir(dir_path=gm_path, files=PLOT_FILES)
         return out[0], out[1], out[2]
 
     @staticmethod
@@ -225,4 +250,4 @@ if __name__ == "__main__":
     evaluator = Evaluator()
     evaluator.evaluate_model()
     if args.gen_video:
-        evaluator.create_update_video_stream_for_component()
+        evaluator.create_update_video_stream()
